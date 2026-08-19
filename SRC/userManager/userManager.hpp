@@ -1,5 +1,8 @@
+#pragma once 
 #include <string>
 #include <vector>
+
+//Estructuras
 
 //Usuario
 struct User {
@@ -24,5 +27,44 @@ struct Profile{
 
 struct ProfileList{
     std::vector<Profile> profiles;
-    bool txtCargado;
+    bool txtCargado = false;
 };
+
+
+
+// Métodos / funciones
+
+//Obtener varibales de entorno
+std::string getEnvVar(const std::string& varName);
+
+
+//Submenus
+void menuUsuarios(const std::string& rutaFile, UserList& ListaUsuarios);
+void menuPerfiles(const std::string& rutaFile, ProfileList& ListaPerfiles);
+
+//Usuarios
+//Leer USUARIOS.TXT
+bool leeUsuariosTxt(const std::string& rutaFile, UserList& ListaUsuarios);
+
+//Listar usuarios
+bool mostrarListaUsuarios(UserList& ListaUsuarios);
+
+//Crear usuario
+bool creaUsuario(const std::string& rutaFile, UserList& ListaUsuarios);
+
+//Borrar usuario
+bool borraUsuario(int idBorrar, const std::string& rutaFile, UserList& ListaUsuarios);
+
+
+//Perfiles
+//Leer PERFILES.TXT
+bool leePerfilesTxt(const std::string& rutaFile, ProfileList& ListaPerfiles);
+
+//Listar perfiles
+bool mostrarListaPerfiles(ProfileList& ListaPerfiles);
+
+//Crear perfil
+bool creaPerfil(const std::string& rutaFile, ProfileList& ListaPerfiles);
+
+//Borrar perfil
+bool borraPerfil(const std::string& nombre, const std::string& rutaFile, ProfileList& ListaPerfiles);
