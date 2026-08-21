@@ -1,6 +1,13 @@
 #pragma once 
 #include <string>
 #include <vector>
+#include <iostream>
+#include <cstdlib>
+#include <fstream>
+#include <filesystem>
+#include <optional>
+
+namespace fs = std::filesystem;
 
 //Estructuras
 
@@ -35,8 +42,9 @@ struct ProfileList{
 // Métodos / funciones
 
 //Obtener varibales de entorno
-std::string getEnvVar(const std::string& varName);
-
+std::string getEnvFile(fs::path rutaActual, const std::string& varName = ".env");
+std::string limpiarString(const std::string& str);
+std::optional<std::string> getEnvVar(const fs::path& rutaEnv, const std::string& clave);
 
 //Submenus
 void menuUsuarios(const std::string& rutaFile, UserList& ListaUsuarios);
