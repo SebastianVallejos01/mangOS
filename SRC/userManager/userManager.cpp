@@ -1,4 +1,5 @@
 #include "userManager.hpp"
+#include <sstream>
 
 
 // Métodos / funciones
@@ -66,7 +67,33 @@ void menuPerfiles(const std::string& rutaFile, ProfileList& ListaPerfiles);
 
 //Usuarios
 //Leer USUARIOS.TXT
-bool leeUsuariosTxt(const std::string& rutaFile, UserList& ListaUsuarios);
+bool leeUsuariosTxt(const std::string& rutaFile, UserList& ListaUsuarios) {
+    std::ifstream archivo(rutaFile);
+    if (!archivo.is_open()) return false;
+
+    ListaUsuarios.users.clear();
+
+    std::string linea;
+    while (std::getline(archivo, linea)) {
+        linea = limpiarString(linea);
+        if (linea.empty()) continue;
+
+        std::stringstream ss(linea);
+        std::string token;
+        User usuario;
+
+        if (std::getline(ss, token, ';')) usuario.id = std::stoi(token);
+        if (std::getline(ss, token, ';')) usuario.nombre = token;
+        if (std::getline(ss, token, ';')) usuario.username = token;
+        if (std::getline(ss, token, ';')) usuario.password = token;
+        if (std::getline(ss, token, ';')) usuario.perfil = token;
+
+        ListaUsuarios.users.push_back(usuario);
+    }
+    
+    ListaUsuarios.txtCargado = true;
+    return true;
+}
 
 //Listar usuarios
 bool mostrarListaUsuarios(UserList& ListaUsuarios);
@@ -80,7 +107,42 @@ bool borraUsuario(int idBorrar, const std::string& rutaFile, UserList& ListaUsua
 
 //Perfiles
 //Leer PERFILES.TXT
-bool leePerfilesTxt(const std::string& rutaFile, ProfileList& ListaPerfiles);
+bool leePerfilesTxt(const std::string& rutaFile, ProfileList& ListaPerfiles) {
+    std::ifstream archivo(rutaFile);
+    if (!archivo.is_open()) return false;
+
+    ListaPerfiles.profiles.clear();
+
+    std::string linea;
+    while (std::getline(archivo, linea)) {
+        linea = limpiarString(linea);
+        if (linea.empty()) continue;
+
+        std::stringstream ss(linea);
+        std::string token;
+        Profile perfil;
+
+        if (std::getline(ss, token, ';')) {
+            perfil.name = token;
+        }
+        
+        std::string permisosStr;
+        if (std::getline(ss, permisosStr)) {
+            std::stringstream ssPermisos(permisosStr);
+            std::string permToken;
+            while (std::getline(ssPermisos, permToken, ',')) {
+                if (!permToken.empty()) {
+                    perfil.permisosMenu.push_back(std::stoi(permToken));
+                }
+            }
+        }
+
+        ListaPerfiles.profiles.push_back(perfil);
+    }
+    
+    ListaPerfiles.txtCargado = true;
+    return true;
+}
 
 //Listar perfiles
 bool mostrarListaPerfiles(ProfileList& ListaPerfiles);
