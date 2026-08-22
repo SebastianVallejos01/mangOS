@@ -148,7 +148,74 @@ bool leePerfilesTxt(const std::string& rutaFile, ProfileList& ListaPerfiles) {
 bool mostrarListaPerfiles(ProfileList& ListaPerfiles);
 
 //Crear perfil
-bool creaPerfil(const std::string& rutaFile, ProfileList& ListaPerfiles);
+bool creaPerfil(const std::string& rutaFile, ProfileList& ListaPerfiles){
+    std::ifstream archivo(rutaFile);
+    if (!archivo.is_open()) return false;
+
+    std::cout<<"Por favor Ingrese los datos para el nuevo perfil"<<std::endl;
+    //Nombre
+    Profile newProfile;
+    std::cout<<"Name: ";
+    std::cin>>newProfile.name;
+    for (char& c : newProfile.name) 
+    {   //Mayusculizar
+    c = std::toupper(c);
+    }
+    bool existe=false;
+    do{
+        if (existe)
+        {
+            std::cout<<"Perfil ya existente, Por favor ingrese un nombre diferente:";
+            std::cin>>newProfile.name;
+            for (char& c : newProfile.name)
+            {
+                c = std::toupper(c);
+            }
+        }
+        existe=false;
+        for (Profile perfil: ListaPerfiles.profiles)
+        {
+            if (perfil.name==newProfile.name)
+            {
+                existe=true;
+                break;
+            }
+        }
+    }while (existe);
+
+    //Permisos
+    std::cout<<"Ingrese los permisos que desea darle al perfil";
+    std::cout<<"1:Agregar, 2:Enlistar, 3: Eliminar ||(Ingrese '0' para terminar)";
+    int permiso;
+    do 
+    {
+        std::cout<<"Ingresar:";
+        std::cin>>permiso;
+        if (permiso >= 1 && permiso <= 3) 
+        {
+            bool existe=false;
+            for (int valor : newProfile.permisosMenu){
+                if (valor==permiso) 
+                {
+                    existe=true;
+                    break;
+                }
+                
+            }
+            if (existe) std::cout<<"El permiso ya pertenece al perfil.";
+            else newProfile.permisosMenu.push_back(permiso);
+        }
+        else if (permiso != 0) 
+        {
+            std::cout << "Permiso invalido." << std::endl;
+        }
+    }while (permiso!=0);
+
+    newProfile.permisosMenu.push_back(0);
+
+
+    return true;
+}
 
 //Borrar perfil
 bool borraPerfil(const std::string& nombre, const std::string& rutaFile, ProfileList& ListaPerfiles);

@@ -29,7 +29,7 @@ struct UserList{
 //Perfil
 struct Profile{
     std::string name; //ADMIN, GENERAL
-    std::vector<int> permisosMenu; //entre 0, 1, 2, 3, 4
+    std::vector<int> permisosMenu; //entre 0, 1, 2, 3, 4 (0: Salir, 1: Ingresar/crear, 2:Enlistar, 3:Eliminar, 4:----)
 };
 
 struct ProfileList{
