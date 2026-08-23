@@ -149,11 +149,13 @@ bool mostrarListaPerfiles(ProfileList& ListaPerfiles);
 
 //Crear perfil
 bool creaPerfil(const std::string& rutaFile, ProfileList& ListaPerfiles){
-    std::ifstream archivo(rutaFile);
+    std::ofstream archivo(rutaFile, std::ios::app);
     if (!archivo.is_open()) return false;
 
+
+// ----------------------CREAR NUEVO PERFIL----------------------
+        //---------------------Nombre
     std::cout<<"Por favor Ingrese los datos para el nuevo perfil"<<std::endl;
-    //Nombre
     Profile newProfile;
     std::cout<<"Name: ";
     std::cin>>newProfile.name;
@@ -183,7 +185,7 @@ bool creaPerfil(const std::string& rutaFile, ProfileList& ListaPerfiles){
         }
     }while (existe);
 
-    //Permisos
+        //------------Permisos
     std::cout<<"Ingrese los permisos que desea darle al perfil";
     std::cout<<"1:Agregar, 2:Enlistar, 3: Eliminar ||(Ingrese '0' para terminar)";
     int permiso;
@@ -213,6 +215,19 @@ bool creaPerfil(const std::string& rutaFile, ProfileList& ListaPerfiles){
 
     newProfile.permisosMenu.push_back(0);
 
+//-----------Adicion a la lista y el TXT--------------------------
+    //----------------Agregar nuevo perfil a listaPerfiles
+
+    ListaPerfiles.profiles.push_back(newProfile);
+    
+    //---------------Agregarlo al TXT
+
+    archivo<<newProfile.name<<";0";
+    for (int proceso:newProfile.permisosMenu)
+    {
+        archivo<<","<<proceso;
+    }
+    archivo<<std::endl;
 
     return true;
 }
