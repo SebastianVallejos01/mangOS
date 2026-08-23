@@ -42,6 +42,10 @@ struct ProfileList{
 // Métodos / funciones
 
 //Obtener varibales de entorno
+std::optional<std::string> valorEnvUsuario;
+std::optional<std::string> valorEnvPerfil;
+
+
 std::string getEnvFile(fs::path rutaActual, const std::string& varName = ".env");
 std::string limpiarString(const std::string& str);
 std::optional<std::string> getEnvVar(const fs::path& rutaEnv, const std::string& clave);
@@ -58,7 +62,7 @@ bool leeUsuariosTxt(const std::string& rutaFile, UserList& ListaUsuarios);
 bool mostrarListaUsuarios(UserList& ListaUsuarios);
 
 //Crear usuario
-bool creaUsuario(const std::string& rutaFile, UserList& ListaUsuarios);
+bool creaUsuario(const std::string& rutaFile, UserList& ListaUsuarios, ProfileList& ListaPerfiles);
 
 //Borrar usuario
 bool borraUsuario(int idBorrar, const std::string& rutaFile, UserList& ListaUsuarios);

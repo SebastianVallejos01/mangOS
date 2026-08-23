@@ -17,6 +17,7 @@ std::string getEnvFile(fs::path rutaActual, const std::string& varName){
         }
         rutaActual = rutaActual.parent_path(); // Sube un nivel
     }
+    std::cout<<"Error. Archivo '"<<varName<<"' no encontrado."<<std::endl;
     return {};
 }
 // Función auxiliar para trimear string
@@ -58,6 +59,7 @@ std::optional<std::string> getEnvVar(const fs::path& rutaEnv, const std::string&
             }
         }
     }
+    std::cout<<"Error. Valor de '"<<clave<<"' no encontrado."<<std::endl;
     return std::nullopt;
 }
 
@@ -99,7 +101,7 @@ bool leeUsuariosTxt(const std::string& rutaFile, UserList& ListaUsuarios) {
 bool mostrarListaUsuarios(UserList& ListaUsuarios);
 
 //Crear usuario
-bool creaUsuario(const std::string& rutaFile, UserList& ListaUsuarios);
+bool creaUsuario(const std::string& rutaFile, UserList& ListaUsuarios, ProfileList& ListaPerfiles);
 
 //Borrar usuario
 bool borraUsuario(int idBorrar, const std::string& rutaFile, UserList& ListaUsuarios);
