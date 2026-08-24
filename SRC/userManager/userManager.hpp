@@ -42,8 +42,8 @@ struct ProfileList{
 // Métodos / funciones
 
 //Obtener varibales de entorno
-std::optional<std::string> valorEnvUsuario;
-std::optional<std::string> valorEnvPerfil;
+inline std::optional<std::string> valorEnvUsuario;
+inline std::optional<std::string> valorEnvPerfil;
 
 
 std::string getEnvFile(fs::path rutaActual, const std::string& varName = ".env");
