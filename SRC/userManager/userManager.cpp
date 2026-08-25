@@ -9,7 +9,7 @@ std::string getEnvFile(fs::path rutaActual, const std::string& varName){
     while (true) {
         fs::path rutaPosible = rutaActual / varName;
         if (fs::exists(rutaPosible)) {
-            return rutaPosible;
+            return rutaPosible.string();
         }
         // Si se llega a la raíz y no se encuentra, se detiene la búsqueda
         if (rutaActual == rutaActual.parent_path()) {
@@ -406,31 +406,34 @@ bool creaPerfil(const std::string& rutaFile, ProfileList& ListaPerfiles){
     // newProfile.permisosMenu.push_back(0);
 
     //Agregar nuevo perfil a listaPerfiles
+    int opc = 0;
+    std::cout << "1) guardar 2) cancelar\n";
+    std::cin >> opc;
+    
+    if (opc == 1) {
+        ListaPerfiles.profiles.push_back(newProfile);
 
-    ListaPerfiles.profiles.push_back(newProfile);
-
-    archivo<<newProfile.name<<";0";
-    for (int proceso:newProfile.permisosMenu)
-    {
-        archivo<<","<<proceso;
+        archivo<<newProfile.name<<";0";
+        for (int proceso:newProfile.permisosMenu)
+        {
+            archivo<<","<<proceso;
+        }
+        archivo<<std::endl;
+        return true;
     }
-    archivo<<std::endl;
-
-    return true;
+    return false;
 }
 
 //Borrar perfil
 bool borraPerfil(const std::string& nombre, const std::string& rutaFile, ProfileList& ListaPerfiles) {
     bool encontrado = false;
+    auto it = ListaPerfiles.profiles.begin();
     
-    // 1. Buscar y eliminar el perfil de la lista en memoria
-    for (auto it = ListaPerfiles.profiles.begin(); it != ListaPerfiles.profiles.end(); ) {
+    // 1. Buscar el perfil de la lista en memoria
+    for (; it != ListaPerfiles.profiles.end(); ++it) {
         if (it->name == nombre) {
-            it = ListaPerfiles.profiles.erase(it);
             encontrado = true;
             break; 
-        } else {
-            ++it;
         }
     }
 
@@ -439,28 +442,36 @@ bool borraPerfil(const std::string& nombre, const std::string& rutaFile, Profile
         return false;
     }
 
-    // 2. Reescribir el archivo PERFILES.TXT completo con la lista actualizada
-    // std::ios::trunc limpia el archivo antes de empezar a escribir
-    std::ofstream archivo(rutaFile, std::ios::trunc); 
-    if (!archivo.is_open()) {
-        std::cout << "Error: No se pudo abrir el archivo para guardar los cambios.\n";
-        return false;
-    }
-
-    for (const auto& perfil : ListaPerfiles.profiles) {
-        archivo << perfil.name << ";";
-        
-        // Escribimos los permisos separados por coma
-        for (size_t i = 0; i < perfil.permisosMenu.size(); ++i) {
-            archivo << perfil.permisosMenu[i];
-            if (i != perfil.permisosMenu.size() - 1) {
-                archivo << ",";
-            }
-        }
-        archivo << "\n";
-    }
+    int opc = 0;
+    std::cout << "1) guardar 2) cancelar\n";
+    std::cin >> opc;
     
-    archivo.close();
-    std::cout << "Perfil '" << nombre << "' eliminado correctamente de la memoria y del archivo.\n";
-    return true;
+    if (opc == 1) {
+        ListaPerfiles.profiles.erase(it);
+        
+        // 2. Reescribir el archivo PERFILES.TXT completo con la lista actualizada
+        std::ofstream archivo(rutaFile, std::ios::trunc); 
+        if (!archivo.is_open()) {
+            std::cout << "Error: No se pudo abrir el archivo para guardar los cambios.\n";
+            return false;
+        }
+
+        for (const auto& perfil : ListaPerfiles.profiles) {
+            archivo << perfil.name << ";";
+            
+            // Escribimos los permisos separados por coma
+            for (size_t i = 0; i < perfil.permisosMenu.size(); ++i) {
+                archivo << perfil.permisosMenu[i];
+                if (i != perfil.permisosMenu.size() - 1) {
+                    archivo << ",";
+                }
+            }
+            archivo << "\n";
+        }
+        
+        archivo.close();
+        std::cout << "Perfil '" << nombre << "' eliminado correctamente de la memoria y del archivo.\n";
+        return true;
+    }
+    return false;
 }
