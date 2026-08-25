@@ -64,6 +64,31 @@ std::optional<std::string> getEnvVar(const fs::path& rutaEnv, const std::string&
 }
 
 //Submenus
+void menuUserManager(const std::string& rutaUserFile, const std::string& rutaPerfilFile, UserList& ListaUsuarios, ProfileList& ListaPerfiles){
+    int opcion;
+    do {
+        std::cout << "\n--- mangOS User Manager ---\n";
+        std::cout << "1) Gestión de Usuarios\n";
+        std::cout << "2) Gestión de Perfiles\n";
+        std::cout << "0) Salir\n";
+        std::cout << "Opción: ";
+        std::cin >> opcion;
+
+        switch (opcion) {
+            case 1:
+                menuUsuarios(rutaUserFile, ListaUsuarios);
+                break;
+            case 2:
+                menuPerfiles(rutaPerfilFile, ListaPerfiles);
+                break;
+            case 0:
+                break;
+            default:
+                std::cout << "Opción inválida.\n";
+                break;
+        }
+    } while (opcion != 0);
+}
 void menuUsuarios(const std::string& rutaFile, UserList& ListaUsuarios) {
     int opcion;
     do {
@@ -97,7 +122,42 @@ void menuUsuarios(const std::string& rutaFile, UserList& ListaUsuarios) {
         }
     } while (opcion != 0);
 }
-void menuPerfiles(const std::string& rutaFile, ProfileList& ListaPerfiles);
+void menuPerfiles(const std::string& rutaFile, ProfileList& ListaPerfiles){
+    int opcion;
+    do {
+        std::cout << "\n--- GESTION DE PERFILES ---\n";
+        std::cout << "1) Ingresar Perfil\n";
+        std::cout << "2) Listar Perfiles\n";
+        std::cout << "3) Eliminar Perfil\n";
+        std::cout << "0) Salir (Volver)\n";
+        std::cout << "Opcion: ";
+        std::cin >> opcion;
+
+        switch (opcion) {
+            case 1:
+                creaPerfil(rutaFile, ListaPerfiles);
+                break;
+            case 2:
+                mostrarListaPerfiles(ListaPerfiles);
+                break;
+            case 3: {
+                std::string nombreBorrar;
+                std::cout << "Nombre del perfil a borrar: ";
+                std::cin >> nombreBorrar;
+                for (char& c : nombreBorrar) {
+                    c = std::toupper(c);
+                }
+                borraPerfil(nombreBorrar, rutaFile, ListaPerfiles);
+                break;
+            }
+            case 0:
+                break;
+            default:
+                std::cout << "Opcion invalida.\n";
+                break;
+        }
+    } while (opcion != 0);
+}
 
 //Usuarios
 //Leer USUARIOS.TXT
@@ -247,7 +307,26 @@ bool leePerfilesTxt(const std::string& rutaFile, ProfileList& ListaPerfiles) {
 }
 
 //Listar perfiles
-bool mostrarListaPerfiles(ProfileList& ListaPerfiles);
+bool mostrarListaPerfiles(ProfileList& ListaPerfiles) {
+    std::cout << "\n--- LISTA DE PERFILES ---\n";
+    if (ListaPerfiles.profiles.empty()) {
+        std::cout << "No hay perfiles registrados en el sistema.\n";
+        return false;
+    }
+    
+    for (const auto& perfil : ListaPerfiles.profiles) {
+        std::cout << "Perfil: " << perfil.name << " | Permisos Menu: ";
+        for (size_t i = 0; i < perfil.permisosMenu.size(); ++i) {
+            std::cout << perfil.permisosMenu[i];
+            if (i != perfil.permisosMenu.size() - 1) {
+                std::cout << ", ";
+            }
+        }
+        std::cout << "\n";
+    }
+    std::cout << "-------------------------\n";
+    return true;
+}
 
 //Crear perfil
 bool creaPerfil(const std::string& rutaFile, ProfileList& ListaPerfiles){
@@ -286,34 +365,45 @@ bool creaPerfil(const std::string& rutaFile, ProfileList& ListaPerfiles){
         }
     }while (existe);
 
-    std::cout<<"Ingrese los permisos que desea darle al perfil";
-    std::cout<<"1:Agregar, 2:Enlistar, 3: Eliminar ||(Ingrese '0' para terminar)";
-    int permiso;
-    do 
-    {
-        std::cout<<"Ingresar:";
-        std::cin>>permiso;
-        if (permiso >= 1 && permiso <= 3) 
+        //------------Permisos
+        std::cout << "\nIngrese los permisos que desea darle al perfil:\n";
+        std::cout << "1: Ingresar, 2: Listar, 3: Eliminar, 4: Otra opcion futura || (Ingrese '0' para terminar)\n";
+        int permiso;
+        do 
         {
-            bool existe=false;
-            for (int valor : newProfile.permisosMenu){
-                if (valor==permiso) 
-                {
-                    existe=true;
-                    break;
-                }
-                
+            std::cout << "Ingresar permiso: ";
+            std::cin >> permiso;
+            
+            // Defensa contra letras (que vimos antes)
+            if (std::cin.fail()) {
+                std::cin.clear();
+                std::cin.ignore(10000, '\n');
+                std::cout << "Error: Por favor ingresa solo numeros.\n";
+                permiso = -1;
+                continue;
             }
-            if (existe) std::cout<<"El permiso ya pertenece al perfil.";
-            else newProfile.permisosMenu.push_back(permiso);
-        }
-        else if (permiso != 0) 
-        {
-            std::cout << "Permiso invalido." << std::endl;
-        }
-    }while (permiso!=0);
+    
+            // AQUI ESTA EL CAMBIO: Ahora permite hasta el 4
+            if (permiso >= 1 && permiso <= 4) 
+            {
+                bool existe = false;
+                for (int valor : newProfile.permisosMenu){
+                    if (valor == permiso) 
+                    {
+                        existe = true;
+                        break;
+                    }
+                }
+                if (existe) std::cout << "El permiso ya pertenece al perfil.\n";
+                else newProfile.permisosMenu.push_back(permiso);
+            }
+            else if (permiso != 0) 
+            {
+                std::cout << "Permiso invalido.\n";
+            }
+        } while (permiso != 0);
 
-    newProfile.permisosMenu.push_back(0);
+    // newProfile.permisosMenu.push_back(0);
 
     //Agregar nuevo perfil a listaPerfiles
 
@@ -330,4 +420,47 @@ bool creaPerfil(const std::string& rutaFile, ProfileList& ListaPerfiles){
 }
 
 //Borrar perfil
-bool borraPerfil(const std::string& nombre, const std::string& rutaFile, ProfileList& ListaPerfiles);
+bool borraPerfil(const std::string& nombre, const std::string& rutaFile, ProfileList& ListaPerfiles) {
+    bool encontrado = false;
+    
+    // 1. Buscar y eliminar el perfil de la lista en memoria
+    for (auto it = ListaPerfiles.profiles.begin(); it != ListaPerfiles.profiles.end(); ) {
+        if (it->name == nombre) {
+            it = ListaPerfiles.profiles.erase(it);
+            encontrado = true;
+            break; 
+        } else {
+            ++it;
+        }
+    }
+
+    if (!encontrado) {
+        std::cout << "Error: No se encontro el perfil '" << nombre << "'.\n";
+        return false;
+    }
+
+    // 2. Reescribir el archivo PERFILES.TXT completo con la lista actualizada
+    // std::ios::trunc limpia el archivo antes de empezar a escribir
+    std::ofstream archivo(rutaFile, std::ios::trunc); 
+    if (!archivo.is_open()) {
+        std::cout << "Error: No se pudo abrir el archivo para guardar los cambios.\n";
+        return false;
+    }
+
+    for (const auto& perfil : ListaPerfiles.profiles) {
+        archivo << perfil.name << ";";
+        
+        // Escribimos los permisos separados por coma
+        for (size_t i = 0; i < perfil.permisosMenu.size(); ++i) {
+            archivo << perfil.permisosMenu[i];
+            if (i != perfil.permisosMenu.size() - 1) {
+                archivo << ",";
+            }
+        }
+        archivo << "\n";
+    }
+    
+    archivo.close();
+    std::cout << "Perfil '" << nombre << "' eliminado correctamente de la memoria y del archivo.\n";
+    return true;
+}
