@@ -64,7 +64,39 @@ std::optional<std::string> getEnvVar(const fs::path& rutaEnv, const std::string&
 }
 
 //Submenus
-void menuUsuarios(const std::string& rutaFile, UserList& ListaUsuarios);
+void menuUsuarios(const std::string& rutaFile, UserList& ListaUsuarios) {
+    int opcion;
+    do {
+        std::cout << "1) Ingresar Usuarios\n";
+        std::cout << "2) Listar Usuarios\n";
+        std::cout << "3) Eliminar Usuarios\n";
+        std::cout << "0) Salir\n";
+        std::cout << "Opcion: ";
+        
+        if (!(std::cin >> opcion)) {
+            std::cin.clear();
+            std::cin.ignore(10000, '\n');
+            opcion = -1;
+            continue;
+        }
+
+        switch (opcion) {
+            case 1: {
+                ProfileList perfiles;
+                creaUsuario(rutaFile, ListaUsuarios, perfiles);
+                break;
+            }
+            case 2:
+                mostrarListaUsuarios(ListaUsuarios);
+                break;
+            case 3:
+                borraUsuario(0, rutaFile, ListaUsuarios);
+                break;
+            case 0:
+                break;
+        }
+    } while (opcion != 0);
+}
 void menuPerfiles(const std::string& rutaFile, ProfileList& ListaPerfiles);
 
 //Usuarios
@@ -98,13 +130,81 @@ bool leeUsuariosTxt(const std::string& rutaFile, UserList& ListaUsuarios) {
 }
 
 //Listar usuarios
-bool mostrarListaUsuarios(UserList& ListaUsuarios);
+bool mostrarListaUsuarios(UserList& ListaUsuarios) {
+    if (!ListaUsuarios.txtCargado) {
+        std::string ruta = valorEnvUsuario.has_value() ? valorEnvUsuario.value() : "usuarios.txt";
+        leeUsuariosTxt(ruta, ListaUsuarios);
+    }
+    
+    for (const auto& u : ListaUsuarios.users) {
+        std::cout << "ID: " << u.id << " | Nombre: " << u.nombre 
+                  << " | Username: " << u.username << " | Perfil: " << u.perfil << "\n";
+    }
+    
+    int opc = 0;
+    std::cout << "1) para Volver : 1\n";
+    std::cin >> opc;
+    return true;
+}
 
 //Crear usuario
-bool creaUsuario(const std::string& rutaFile, UserList& ListaUsuarios, ProfileList& ListaPerfiles);
+bool creaUsuario(const std::string& rutaFile, UserList& ListaUsuarios, ProfileList& ListaPerfiles) {
+    User newUser;
+    std::cout << "Ingrese id: ";
+    std::cin >> newUser.id;
+    std::cout << "Ingrese nombre: ";
+    std::cin.ignore(10000, '\n');
+    std::getline(std::cin, newUser.nombre);
+    std::cout << "Ingrese username: ";
+    std::getline(std::cin, newUser.username);
+    std::cout << "Ingrese password: ";
+    std::getline(std::cin, newUser.password);
+    std::cout << "Ingrese perfil: ";
+    std::getline(std::cin, newUser.perfil);
+
+    int opc = 0;
+    std::cout << "1) guardar 2) cancelar\n";
+    std::cin >> opc;
+    if (opc == 1) {
+        ListaUsuarios.users.push_back(newUser);
+        std::ofstream file(rutaFile, std::ios::app);
+        if (file.is_open()) {
+            file << newUser.id << ";" << newUser.nombre << ";" << newUser.username << ";" << newUser.password << ";" << newUser.perfil << "\n";
+        }
+        return true;
+    }
+    return false;
+}
 
 //Borrar usuario
-bool borraUsuario(int idBorrar, const std::string& rutaFile, UserList& ListaUsuarios);
+bool borraUsuario(int idBorrar, const std::string& rutaFile, UserList& ListaUsuarios) {
+    std::cout << "Ingrese el ID del usuario a borrar: ";
+    std::cin >> idBorrar;
+
+    for (auto it = ListaUsuarios.users.begin(); it != ListaUsuarios.users.end(); ++it) {
+        if (it->id == idBorrar) {
+            if (it->perfil == "ADMIN") {
+                std::cout << "ALERTA: El usuario a eliminar tiene el perfil ADMIN.\n";
+            }
+            int opc = 0;
+            std::cout << "1) guardar 2) cancelar\n";
+            std::cin >> opc;
+            if (opc == 1) {
+                ListaUsuarios.users.erase(it);
+                std::ofstream file(rutaFile, std::ios::trunc);
+                if (file.is_open()) {
+                    for (const auto& u : ListaUsuarios.users) {
+                        file << u.id << ";" << u.nombre << ";" << u.username << ";" << u.password << ";" << u.perfil << "\n";
+                    }
+                }
+                return true;
+            }
+            return false;
+        }
+    }
+    std::cout << "Usuario no encontrado.\n";
+    return false;
+}
 
 
 //Perfiles
@@ -155,8 +255,7 @@ bool creaPerfil(const std::string& rutaFile, ProfileList& ListaPerfiles){
     if (!archivo.is_open()) return false;
 
 
-// ----------------------CREAR NUEVO PERFIL----------------------
-        //---------------------Nombre
+//Crear nuevo perfil
     std::cout<<"Por favor Ingrese los datos para el nuevo perfil"<<std::endl;
     Profile newProfile;
     std::cout<<"Name: ";
@@ -187,7 +286,6 @@ bool creaPerfil(const std::string& rutaFile, ProfileList& ListaPerfiles){
         }
     }while (existe);
 
-        //------------Permisos
     std::cout<<"Ingrese los permisos que desea darle al perfil";
     std::cout<<"1:Agregar, 2:Enlistar, 3: Eliminar ||(Ingrese '0' para terminar)";
     int permiso;
@@ -217,12 +315,9 @@ bool creaPerfil(const std::string& rutaFile, ProfileList& ListaPerfiles){
 
     newProfile.permisosMenu.push_back(0);
 
-//-----------Adicion a la lista y el TXT--------------------------
-    //----------------Agregar nuevo perfil a listaPerfiles
+    //Agregar nuevo perfil a listaPerfiles
 
     ListaPerfiles.profiles.push_back(newProfile);
-    
-    //---------------Agregarlo al TXT
 
     archivo<<newProfile.name<<";0";
     for (int proceso:newProfile.permisosMenu)
