@@ -1,5 +1,4 @@
 #include "userManager.hpp"
-#include <sstream>
 
 
 // Métodos / funciones
@@ -76,7 +75,7 @@ void menuUserManager(const std::string& rutaUserFile, const std::string& rutaPer
 
         switch (opcion) {
             case 1:
-                menuUsuarios(rutaUserFile, ListaUsuarios);
+                menuUsuarios(rutaUserFile, ListaUsuarios, ListaPerfiles);
                 break;
             case 2:
                 menuPerfiles(rutaPerfilFile, ListaPerfiles);
@@ -89,14 +88,15 @@ void menuUserManager(const std::string& rutaUserFile, const std::string& rutaPer
         }
     } while (opcion != 0);
 }
-void menuUsuarios(const std::string& rutaFile, UserList& ListaUsuarios) {
+void menuUsuarios(const std::string& rutaFile, UserList& ListaUsuarios, ProfileList& ListaPerfiles){
     int opcion;
     do {
+        std::cout << "\n--- GESTIÓN DE USUARIOS ---\n";
         std::cout << "1) Ingresar Usuarios\n";
         std::cout << "2) Listar Usuarios\n";
         std::cout << "3) Eliminar Usuarios\n";
         std::cout << "0) Salir\n";
-        std::cout << "Opcion: ";
+        std::cout << "Opción: ";
         
         if (!(std::cin >> opcion)) {
             std::cin.clear();
@@ -107,15 +107,17 @@ void menuUsuarios(const std::string& rutaFile, UserList& ListaUsuarios) {
 
         switch (opcion) {
             case 1: {
-                ProfileList perfiles;
-                creaUsuario(rutaFile, ListaUsuarios, perfiles);
+                creaUsuario(rutaFile, ListaUsuarios, ListaPerfiles);
                 break;
             }
             case 2:
-                mostrarListaUsuarios(ListaUsuarios);
+                mostrarListaUsuarios(ListaUsuarios, ListaPerfiles);
                 break;
             case 3:
-                borraUsuario(0, rutaFile, ListaUsuarios);
+                int idBorrar;
+                std::cout << "Ingrese el ID del usuario a borrar: ";
+                std::cin >> idBorrar;
+                borraUsuario(idBorrar, rutaFile, ListaUsuarios);
                 break;
             case 0:
                 break;
@@ -125,12 +127,12 @@ void menuUsuarios(const std::string& rutaFile, UserList& ListaUsuarios) {
 void menuPerfiles(const std::string& rutaFile, ProfileList& ListaPerfiles){
     int opcion;
     do {
-        std::cout << "\n--- GESTION DE PERFILES ---\n";
+        std::cout << "\n--- GESTIÓN DE PERFILES ---\n";
         std::cout << "1) Ingresar Perfil\n";
         std::cout << "2) Listar Perfiles\n";
         std::cout << "3) Eliminar Perfil\n";
         std::cout << "0) Salir (Volver)\n";
-        std::cout << "Opcion: ";
+        std::cout << "Opción: ";
         std::cin >> opcion;
 
         switch (opcion) {
@@ -153,7 +155,7 @@ void menuPerfiles(const std::string& rutaFile, ProfileList& ListaPerfiles){
             case 0:
                 break;
             default:
-                std::cout << "Opcion invalida.\n";
+                std::cout << "Opción inválida.\n";
                 break;
         }
     } while (opcion != 0);
@@ -161,7 +163,7 @@ void menuPerfiles(const std::string& rutaFile, ProfileList& ListaPerfiles){
 
 //Usuarios
 //Leer USUARIOS.TXT
-bool leeUsuariosTxt(const std::string& rutaFile, UserList& ListaUsuarios) {
+bool leeUsuariosTxt(const std::string& rutaFile, UserList& ListaUsuarios, ProfileList& ListaPerfiles) {
     std::ifstream archivo(rutaFile);
     if (!archivo.is_open()) return false;
 
@@ -182,6 +184,19 @@ bool leeUsuariosTxt(const std::string& rutaFile, UserList& ListaUsuarios) {
         if (std::getline(ss, token, ';')) usuario.password = token;
         if (std::getline(ss, token, ';')) usuario.perfil = token;
 
+        bool perfilValido = false;
+        for (const auto& perfil : ListaPerfiles.profiles) {
+            if (perfil.name == usuario.perfil) {
+                perfilValido = true;
+                break;
+            }
+        }
+
+        if (!perfilValido) {
+            std::cerr << "Advertencia: Usuario '" << usuario.username << "' tiene un perfil inválido. Asignando 'GENERAL' por defecto.\n";
+            usuario.perfil = "GENERAL";
+        }
+
         ListaUsuarios.users.push_back(usuario);
     }
     
@@ -190,10 +205,10 @@ bool leeUsuariosTxt(const std::string& rutaFile, UserList& ListaUsuarios) {
 }
 
 //Listar usuarios
-bool mostrarListaUsuarios(UserList& ListaUsuarios) {
+bool mostrarListaUsuarios(UserList& ListaUsuarios, ProfileList& ListaPerfiles) {
     if (!ListaUsuarios.txtCargado) {
         std::string ruta = valorEnvUsuario.has_value() ? valorEnvUsuario.value() : "usuarios.txt";
-        leeUsuariosTxt(ruta, ListaUsuarios);
+        leeUsuariosTxt(ruta, ListaUsuarios, ListaPerfiles);
     }
     
     for (const auto& u : ListaUsuarios.users) {
@@ -210,6 +225,8 @@ bool mostrarListaUsuarios(UserList& ListaUsuarios) {
 //Crear usuario
 bool creaUsuario(const std::string& rutaFile, UserList& ListaUsuarios, ProfileList& ListaPerfiles) {
     User newUser;
+
+    //Ingreso de atributos del usuario
     std::cout << "Ingrese id: ";
     std::cin >> newUser.id;
     std::cout << "Ingrese nombre: ";
@@ -222,6 +239,25 @@ bool creaUsuario(const std::string& rutaFile, UserList& ListaUsuarios, ProfileLi
     std::cout << "Ingrese perfil: ";
     std::getline(std::cin, newUser.perfil);
 
+    //Validación de existencia del perfil ingresado
+    for (char& c : newUser.perfil) {
+        c = std::toupper(c);
+    }
+
+    bool perfilExiste = false;
+    for (const auto& p : ListaPerfiles.profiles) {
+        if (p.name == newUser.perfil) {
+            perfilExiste = true;
+            break;
+        }
+    }
+
+    if (!perfilExiste) {
+        std::cout << "Error: El perfil '" << newUser.perfil << "' no existe en el sistema.\n";
+        return false; // Cancela la creación
+    }
+
+    //Guardar usuario en memoria y en archivo. O cancelar la acción
     int opc = 0;
     std::cout << "1) guardar 2) cancelar\n";
     std::cin >> opc;
@@ -238,9 +274,6 @@ bool creaUsuario(const std::string& rutaFile, UserList& ListaUsuarios, ProfileLi
 
 //Borrar usuario
 bool borraUsuario(int idBorrar, const std::string& rutaFile, UserList& ListaUsuarios) {
-    std::cout << "Ingrese el ID del usuario a borrar: ";
-    std::cin >> idBorrar;
-
     for (auto it = ListaUsuarios.users.begin(); it != ListaUsuarios.users.end(); ++it) {
         if (it->id == idBorrar) {
             if (it->perfil == "ADMIN") {
@@ -269,41 +302,108 @@ bool borraUsuario(int idBorrar, const std::string& rutaFile, UserList& ListaUsua
 
 //Perfiles
 //Leer PERFILES.TXT
+//Leer PERFILES.TXT
 bool leePerfilesTxt(const std::string& rutaFile, ProfileList& ListaPerfiles) {
     std::ifstream archivo(rutaFile);
-    if (!archivo.is_open()) return false;
-
+    
     ListaPerfiles.profiles.clear();
 
-    std::string linea;
-    while (std::getline(archivo, linea)) {
-        linea = limpiarString(linea);
-        if (linea.empty()) continue;
+    // 1. Envolvemos la lectura en un if, para NO abortar si el archivo no existe
+    if (archivo.is_open()) {
+        std::string linea;
+        while (std::getline(archivo, linea)) {
+            linea = limpiarString(linea);
+            if (linea.empty()) continue;
 
-        std::stringstream ss(linea);
-        std::string token;
-        Profile perfil;
+            std::stringstream ss(linea);
+            std::string token;
+            Profile perfil;
 
-        if (std::getline(ss, token, ';')) {
-            perfil.name = token;
-        }
-        
-        std::string permisosStr;
-        if (std::getline(ss, permisosStr)) {
-            std::stringstream ssPermisos(permisosStr);
-            std::string permToken;
-            while (std::getline(ssPermisos, permToken, ',')) {
-                if (!permToken.empty()) {
-                    perfil.permisosMenu.push_back(std::stoi(permToken));
+            // 2. Limpiamos espacios basura y forzamos mayúsculas
+            if (std::getline(ss, token, ';')) {
+                perfil.name = limpiarString(token);
+                for (char& c : perfil.name) {
+                    c = std::toupper(c);
                 }
             }
+            
+            std::string permisosStr;
+            if (std::getline(ss, permisosStr)) {
+                std::stringstream ssPermisos(permisosStr);
+                std::string permToken;
+                while (std::getline(ssPermisos, permToken, ',')) {
+                    if (!permToken.empty()) {
+                        try {
+                            int permiso = std::stoi(permToken);
+                            if (permiso >= 0 && permiso <= 4) {
+                                perfil.permisosMenu.push_back(permiso);
+                            } else {
+                                std::cerr << "Advertencia: Permiso '" << permiso << "' ignorado por estar fuera del rango permitido (0-4).\n";
+                            }
+                        } catch (const std::exception& e) {
+                            std::cerr << "Advertencia: Dato corrupto '" << permToken << "' en permisos ignorado.\n";
+                        }
+                    }
+                }
+            }
+            ListaPerfiles.profiles.push_back(perfil);
         }
-
-        ListaPerfiles.profiles.push_back(perfil);
+        archivo.close();
     }
+
+    // 3. Llamar SIEMPRE a la auto-creación. 
+    // Usamos 'rutaFile' local en lugar de la global 'valorEnvPerfil.value()' para mayor seguridad.
+    autoCrearPerfilesBase(rutaFile, ListaPerfiles);
     
     ListaPerfiles.txtCargado = true;
     return true;
+}
+
+// Función auxiliar para garantizar la existencia de ADMIN y GENERAL
+void autoCrearPerfilesBase(const std::string& rutaFile, ProfileList& ListaPerfiles) {
+    bool adminExiste = false;
+    bool generalExiste = false;
+    
+    //Revisar perfiles cargados
+    for (const auto& p : ListaPerfiles.profiles) {
+        if (p.name == "ADMIN") adminExiste = true;
+        if (p.name == "GENERAL") generalExiste = true;
+    }
+
+    bool addNew = false;
+    
+    //Crear ADMIN si no existe
+    if (!adminExiste) {
+        Profile pAdmin;
+        pAdmin.name = "ADMIN";
+        pAdmin.permisosMenu = {0, 1, 2, 3, 4}; 
+        ListaPerfiles.profiles.push_back(pAdmin);
+        addNew = true;
+        std::cout << "Aviso del Sistema: Perfil 'ADMIN' restaurado por defecto.\n";
+    }
+    
+    //Crear GENERAL si no existe
+    if (!generalExiste) {
+        Profile pGeneral;
+        pGeneral.name = "GENERAL";
+        pGeneral.permisosMenu = {0, 1, 3}; 
+        ListaPerfiles.profiles.push_back(pGeneral);
+        addNew = true;
+        std::cout << "Aviso del Sistema: Perfil 'GENERAL' restaurado por defecto.\n";
+    }
+
+    //Escribir nuevos perfiles en el TXT
+    if (addNew) {
+        std::ofstream archivoOut(rutaFile, std::ios::app);
+        if (archivoOut.is_open()) {
+            if (!adminExiste) {
+                archivoOut << "ADMIN;0,1,2,3,4\n";
+            }
+            if (!generalExiste) {
+                archivoOut << "GENERAL;0,1,3\n";
+            }
+        }
+    }
 }
 
 //Listar perfiles
@@ -426,6 +526,11 @@ bool creaPerfil(const std::string& rutaFile, ProfileList& ListaPerfiles){
 
 //Borrar perfil
 bool borraPerfil(const std::string& nombre, const std::string& rutaFile, ProfileList& ListaPerfiles) {
+    //Proteger perfiles originales del sistema
+    if (nombre == "ADMIN" || nombre == "GENERAL") {
+        std::cout << "Error: No se puede eliminar el perfil '" << nombre << "'.\n";
+        return false;
+    }
     bool encontrado = false;
     auto it = ListaPerfiles.profiles.begin();
     

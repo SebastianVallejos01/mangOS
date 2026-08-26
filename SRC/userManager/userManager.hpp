@@ -6,6 +6,7 @@
 #include <fstream>
 #include <filesystem>
 #include <optional>
+#include <sstream>
 
 namespace fs = std::filesystem;
 
@@ -52,15 +53,15 @@ std::optional<std::string> getEnvVar(const fs::path& rutaEnv, const std::string&
 
 //Menú/Submenus
 void menuUserManager(const std::string& rutaUserFile, const std::string& rutaPerfilFile, UserList& ListaUsuarios, ProfileList& ListaPerfiles);
-void menuUsuarios(const std::string& rutaFile, UserList& ListaUsuarios);
+void menuUsuarios(const std::string& rutaFile, UserList& ListaUsuarios, ProfileList& ListaPerfiles);
 void menuPerfiles(const std::string& rutaFile, ProfileList& ListaPerfiles);
 
 //Usuarios
 //Leer USUARIOS.TXT
-bool leeUsuariosTxt(const std::string& rutaFile, UserList& ListaUsuarios);
+bool leeUsuariosTxt(const std::string& rutaFile, UserList& ListaUsuarios, ProfileList& ListaPerfiles);
 
 //Listar usuarios
-bool mostrarListaUsuarios(UserList& ListaUsuarios);
+bool mostrarListaUsuarios(UserList& ListaUsuarios, ProfileList& ListaPerfiles);
 
 //Crear usuario
 bool creaUsuario(const std::string& rutaFile, UserList& ListaUsuarios, ProfileList& ListaPerfiles);
@@ -72,6 +73,9 @@ bool borraUsuario(int idBorrar, const std::string& rutaFile, UserList& ListaUsua
 //Perfiles
 //Leer PERFILES.TXT
 bool leePerfilesTxt(const std::string& rutaFile, ProfileList& ListaPerfiles);
+
+//Crear automáticamente los perfiles base (ADMIN y GENERAL) si no existen
+void autoCrearPerfilesBase(const std::string& rutaFile, ProfileList& ListaPerfiles);
 
 //Listar perfiles
 bool mostrarListaPerfiles(ProfileList& ListaPerfiles);
