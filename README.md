@@ -2,8 +2,8 @@
 
 Repositorio del proyecto semestral del equipo mangOS de INFO198 - Sistemas operativos. Ingeniería Civil en Informática, Universidad Austral de Chile. Segundo semestre, 2026.
 
-**Docente:** Dr. Luis Veas Castillo.  
-**Ayudante:** Francisco Labrín.  
+**Docente:** Dr. Luis Veas Castillo.
+**Ayudante:** Francisco Labrín.
 **Equipo:** Jorge Cárcamo, Sebastián Catalán, Dante Gatica, Sebastián Vallejos y Alonso Véliz.
 
 ---
@@ -25,7 +25,7 @@ Actualmente, el sistema implementa un completo módulo de gestión de identidade
 - **Persistencia de Datos:** Toda la información se guarda localmente en archivos de texto, por lo que el sistema recuerda los datos entre ejecuciones.
 - **Configuración por Entorno:** Las rutas de los archivos de texto se configuran de manera segura usando variables de entorno en un archivo `.env`.
 
----
+Se empleó IA generativa, Google Gemini y ChatGPT, para asesoría en torno a corrección algorítmica y sintáctica del código fuente y de la correctitud conceptual, de formato y estructura del presente documento y del Manual de Usuario. Los autores asumen la responsabilidad por el contenido y la precisión del trabajo presentado.---
 
 ## Cómo compilar y ejecutar
 
@@ -33,33 +33,42 @@ El proyecto está escrito en C++ estándar y puede compilarse usando herramienta
 
 ### 1. Requisitos previos
 
-Asegúrate de contar con un compilador de C++ instalado.
+Asegúrese de contar con un compilador de C++ instalado.
 
 ### 2. Configuración inicial
 
 El sistema requiere de un archivo `.env` en la raíz del proyecto (o donde se ejecute el binario) con las rutas de los archivos de base de datos.
-Asegúrate de que tu archivo `.env` contiene información como:
+Asegúrese de que su archivo `.env` contienga información como:
 
 ```env
 USUARIOS_TXT=./USUARIOS.TXT
 PERFILES_TXT=./PERFILES.TXT
 ```
 
-### 3. Compilación (Ejemplo usando `g++`)
+### 3. Compilación
 
-Desde la carpeta raíz del proyecto, puedes compilar todos los archivos fuente juntos:
+La forma recomendada y automatizada de compilar el proyecto es utilizando la herramienta `make`. Desde la raíz del proyecto, simplemente ejecute:
 
 ```bash
-g++ -std=c++17 SRC/SistOpe/SistOpe.cpp SRC/userManager/userManager.cpp -o mangOS.exe
+make
+```
+
+Nota: El Makefile está configurado para usar g++ por defecto. Si desea utilizar otro compilador (como clang++), puede compilar manualmente, ejecutando:
+
+```bash
+clang++ -std=c++17 SRC/SistOpe/SistOpe.cpp SRC/userManager/userManager.cpp -o mangOS
 ```
 
 ### 4. Ejecución
 
-Una vez compilado y con el archivo `.env` en el mismo directorio (o en la ruta esperada), ejecuta:
+Una vez compilado y con el archivo `.env` en el mismo directorio (o en la ruta esperada), ejecute:
 
 ```bash
-./mangOS.exe
+./mangOS
 ```
+### 5. Operación
+
+Las instrucciones básicas de operación se encuentran en `Manual_Usuario.md` junto a especificaciones generales del funcionamiento del módulo userManager.
 
 ---
 
@@ -69,8 +78,8 @@ Una vez compilado y con el archivo `.env` en el mismo directorio (o en la ruta e
 mangOS
     │   .env                  # Archivo de configuración con variables de entorno
     │   Makefile              # Archivo para automatizar la compilación
-    │   mangOS.exe            # Ejecutable final compilado
     │   README.md             # Documentación principal del proyecto
+    |   Manual_Usuario.md     # Especificaciones funcionales e instrucciones de uso.
     │
     ├───BD                    # Carpeta base para el almacenamiento de datos
     │   └───UM                # Datos del módulo User Manager
