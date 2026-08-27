@@ -52,8 +52,8 @@ El sistema requiere de un archivo `.env` en la raíz del proyecto (o donde se ej
 Asegúrese de que su archivo `.env` contienga información como:
 
 ```env
-USUARIOS_TXT=./USUARIOS.TXT
-PERFILES_TXT=./PERFILES.TXT
+USER_FILE=./USUARIOS.TXT
+PERFIL_FILE=./PERFILES.TXT
 ```
 
 ### 3. Compilación
