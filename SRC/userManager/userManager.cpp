@@ -519,7 +519,7 @@ bool creaPerfil(const std::string& rutaFile, ProfileList& ListaPerfiles){
 
         //Permisos
         std::cout << "\nIngrese los permisos que desea darle al perfil:\n";
-        std::cout << "1: Ingresar, 2: Listar, 3: Eliminar, 4: Otra opcion futura || (Ingrese '0' para terminar)\n";
+        std::cout << "Se aceptan permisos del 1 al 4 para opciones futuras || (Ingrese '0' para terminar)\n";
         int permiso;
         do 
         {
@@ -530,7 +530,7 @@ bool creaPerfil(const std::string& rutaFile, ProfileList& ListaPerfiles){
             if (std::cin.fail()) {
                 std::cin.clear();
                 std::cin.ignore(10000, '\n');
-                std::cout << "Error: Por favor ingresa solo numeros.\n";
+                std::cout << "Error: Por favor ingrese solo números.\n";
                 permiso = -1;
                 continue;
             }
