@@ -56,6 +56,14 @@ USER_FILE=./USUARIOS.TXT
 PERFIL_FILE=./PERFILES.TXT
 ```
 
+Se presenta tabla que describe a detalle las variables de entorno.
+
+
+| Key           | Value            | Descripción             | Formato del contenido                   |
+| ------------- | ---------------- | ------------------------ | --------------------------------------- |
+| `USER_FILE`   | `./USUARIOS.TXT` | Ruta archivo de usuarios | `id; nombre; usuario; password; perfil` |
+| `PERFIL_FILE` | `./PERFILES.TXT` | Ruta archivo de perfiles | `nombre;permisos`                       |
+
 ### 3. Compilación
 
 La forma recomendada y automatizada de compilar el proyecto es utilizando la herramienta `make`. Desde la raíz del proyecto, simplemente ejecute:
