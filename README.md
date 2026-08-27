@@ -2,8 +2,8 @@
 
 Repositorio del proyecto semestral del equipo mangOS de INFO198 - Sistemas operativos. Ingeniería Civil en Informática, Universidad Austral de Chile. Segundo semestre, 2026.
 
-**Docente:** Dr. Luis Veas Castillo.
-**Ayudante:** Francisco Labrín.
+**Docente:** Dr. Luis Veas Castillo.<br>
+**Ayudante:** Francisco Labrín.<br>
 **Equipo:** Jorge Cárcamo, Sebastián Catalán, Dante Gatica, Sebastián Vallejos y Alonso Véliz.
 
 ---
