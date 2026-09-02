@@ -34,7 +34,7 @@ Actualmente, el sistema implementa un completo módulo de gestión de identidade
 
 ## Declaración de uso de IA generativa
 
-Se empleó IA generativa, Google Gemini Pro y ChatGPT-5.6 Luna, para asesoría en torno a corrección algorítmica y sintáctica del código fuente y de la correctitud conceptual, de formato y estructura del presente documento y del Manual de Usuario. Los autores asumen la responsabilidad por el contenido y la precisión del trabajo presentado.
+Se empleó IA generativa, Google Gemini Pro y ChatGPT-5.6 Luna, para asesoría en torno a correctitud algorítmica y sintáctica del código fuente y de la corrección conceptual, de formato y estructura del presente documento y del Manual de Usuario. Los autores asumen la responsabilidad por el contenido y la precisión del trabajo presentado.
 
 ---
 
