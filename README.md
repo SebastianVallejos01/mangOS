@@ -111,6 +111,22 @@ mangOS
         ├───SistOpe           # Núcleo principal del Sistema Operativo
         │       SistOpe.cpp   # Archivo principal (Main), enlaza los menús
         │
+        ├───login             # Módulo de autenticación
+        │       login.cpp      # Lógica de login
+        │       login.hpp      # Cabecera del módulo de login
+        │
+        ├───mainMenu          # Menú principal del sistema
+        │       mainMenu.cpp   # Lógica del menú principal
+        │       mainMenu.hpp   # Cabecera del módulo del menú principal
+        │
+        ├───mates             # Módulo matemático / cálculo
+        │       mates.cpp      # Lógica del módulo mates
+        │       mates.hpp      # Cabecera del módulo mates
+        │
+        ├───texto             # Módulo de texto
+        │       texto.cpp      # Lógica del módulo texto
+        │       texto.hpp      # Cabecera del módulo texto
+        │
         └───userManager       # Módulo de gestión de identidades y accesos
                 userManager.cpp # Lógica interactiva de usuarios y perfiles
                 userManager.hpp # Cabecera con declaración de estructuras (User, Profile)
