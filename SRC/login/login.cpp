@@ -29,6 +29,6 @@ std::optional<User> validaLogin(const std::string& name, const std::string& pass
     if (usuarioExiste)
         if (usuario.password==pass) return usuario;
     
-    std::cout<<"Error. Credenciales incorrectas."<<std::endl;
+    std::cout<<"Error de autenticación: Credenciales incorrectas."<<std::endl;
     return std::nullopt;
 }
