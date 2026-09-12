@@ -1,10 +1,10 @@
-#include "../userManager/userManager.hpp"
-
+#pragma once
+#include <string>
+#include <iostream>
 
 void menuPoli();
 
-template <typename N>
-void polinomio(N x);
+void polinomio(const double& x);
 
 void menuMatriz();
 

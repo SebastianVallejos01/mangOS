@@ -1,5 +1,10 @@
 #include "../userManager/userManager.hpp"
 #include "../login/login.hpp"
+#include "../mainMenu/mainMenu.hpp"
+#include "../mates/mates.hpp"
+#include "../texto/texto.hpp"
+
+
 
 int main(int argc, char* argv[]) {
     //Validar ejecución del sistema y recibir datos de usuario
@@ -35,12 +40,9 @@ int main(int argc, char* argv[]) {
 
     //Validación de credenciales
     loggedUser = validaLogin(userName, passWord, ListaUsuarios);
-    //if (!loggedUser) return 1;
+    if (!loggedUser) return 1;
+    //menuUserManager(valorEnvUsuario.value(), valorEnvPerfil.value(), ListaUsuarios, ListaPerfiles);
+    mainMenu(*loggedUser, userRuta, valorEnvUsuario.value(), valorEnvPerfil.value(), ListaUsuarios, ListaPerfiles);
 
-    
-    //Ejecutar módulo de gestión de usuarios y perfiles
-    menuUserManager(valorEnvUsuario.value(), valorEnvPerfil.value(), ListaUsuarios, ListaPerfiles);
-    
-    
     return 0;
 }
