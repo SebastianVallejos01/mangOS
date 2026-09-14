@@ -60,6 +60,20 @@ std::optional<std::string> getEnvVar(const fs::path& rutaEnv, const std::string&
     return std::nullopt;
 }
 
+bool hasPermiso(const Profile& p, const int& permiso) {
+    return std::binary_search(p.permisosMenu.begin(), p.permisosMenu.end(), permiso);
+}
+
+std::optional<Profile> getPerfil(const ProfileList& listaPerfiles, const std::string& nombrePerfil) {
+    for (const auto& perfil : listaPerfiles.profiles) {
+        if (perfil.name == nombrePerfil) {
+            return perfil;
+        }
+    }
+    std::cerr << "Error: Perfil de usuario no encontrado." << std::endl;
+    return std::nullopt;
+}
+
 //Submenus
 void menuUserManager(const std::string& rutaUserFile, const std::string& rutaPerfilFile, UserList& ListaUsuarios, ProfileList& ListaPerfiles){
     int opcion;
@@ -267,6 +281,11 @@ bool creaUsuario(const std::string& rutaFile, UserList& ListaUsuarios, ProfileLi
     std::cout << "Ingrese perfil: ";
     std::getline(std::cin, newUser.perfil);
 
+    // Convertir el perfil ingresado a mayúsculas antes de validarlo
+    for (char& c : newUser.perfil) {
+        c = std::toupper(c);
+    }
+
     // Validación de unicidad del username ingresado
     for (const auto& u : ListaUsuarios.users) {
         if (u.username == newUser.username) {
@@ -276,9 +295,6 @@ bool creaUsuario(const std::string& rutaFile, UserList& ListaUsuarios, ProfileLi
     }
 
     //Validación de existencia del perfil ingresado
-    for (char& c : newUser.perfil) {
-        c = std::toupper(c);
-    }
 
     bool perfilExiste = false;
     for (const auto& p : ListaPerfiles.profiles) {
@@ -371,10 +387,10 @@ bool leePerfilesTxt(const std::string& rutaFile, ProfileList& ListaPerfiles) {
                     if (!permToken.empty()) {
                         try {
                             int permiso = std::stoi(permToken);
-                            if (permiso >= 0 && permiso <= 4) {
+                            if (permiso >= 0 && permiso <= 7) {
                                 perfil.permisosMenu.push_back(permiso);
                             } else {
-                                std::cerr << "Advertencia: Permiso '" << permiso << "' ignorado por estar fuera del rango permitido (0-4).\n";
+                                std::cerr << "Advertencia: Permiso '" << permiso << "' ignorado por estar fuera del rango permitido (0-7).\n";
                             }
                         } catch (const std::exception& e) {
                             std::cerr << "Advertencia: Dato corrupto '" << permToken << "' en permisos ignorado.\n";
@@ -406,15 +422,15 @@ void autoCrearPerfilesBase(const std::string& rutaFile, ProfileList& ListaPerfil
         if (p.name == "ADMIN") {
             adminExiste = true;
             // Si alguien alteró el TXT, lo corregimos
-            if (p.permisosMenu != std::vector<int>{0, 1, 2, 3, 4}) {
-                p.permisosMenu = {0, 1, 2, 3, 4};
+            if (p.permisosMenu != std::vector<int>{0, 1, 2, 3, 4, 5, 6, 7}) {
+                p.permisosMenu = {0, 1, 2, 3, 4, 5, 6, 7};
                 requiereGuardar = true;
             }
         }
         if (p.name == "GENERAL") {
             generalExiste = true;
-            if (p.permisosMenu != std::vector<int>{0, 1, 3}) {
-                p.permisosMenu = {0, 1, 3};
+            if (p.permisosMenu != std::vector<int>{0, 2, 3, 4, 5, 6, 7}) {
+                p.permisosMenu = {0, 2, 3, 4, 5, 6, 7};
                 requiereGuardar = true;
             }
         }
@@ -424,7 +440,7 @@ void autoCrearPerfilesBase(const std::string& rutaFile, ProfileList& ListaPerfil
     if (!adminExiste) {
         Profile pAdmin;
         pAdmin.name = "ADMIN";
-        pAdmin.permisosMenu = {0, 1, 2, 3, 4}; 
+        pAdmin.permisosMenu = {0, 1, 2, 3, 4, 5, 6, 7}; 
         ListaPerfiles.profiles.push_back(pAdmin);
         requiereGuardar = true;
         std::cout << "Aviso del Sistema: Perfil 'ADMIN' restaurado por defecto.\n";
@@ -434,7 +450,7 @@ void autoCrearPerfilesBase(const std::string& rutaFile, ProfileList& ListaPerfil
     if (!generalExiste) {
         Profile pGeneral;
         pGeneral.name = "GENERAL";
-        pGeneral.permisosMenu = {0, 1, 3}; 
+        pGeneral.permisosMenu = {0, 2, 3, 4, 5, 6, 7}; 
         ListaPerfiles.profiles.push_back(pGeneral);
         requiereGuardar = true;
         std::cout << "Aviso del Sistema: Perfil 'GENERAL' restaurado por defecto.\n";
@@ -519,7 +535,7 @@ bool creaPerfil(const std::string& rutaFile, ProfileList& ListaPerfiles){
 
         //Permisos
         std::cout << "\nIngrese los permisos que desea darle al perfil:\n";
-        std::cout << "Se aceptan permisos del 1 al 4 para opciones futuras || (Ingrese '0' para terminar)\n";
+        std::cout << "Se aceptan permisos del 1 al 7 para opciones futuras || (Ingrese '0' para terminar)\n";
         int permiso;
         do 
         {
@@ -536,7 +552,7 @@ bool creaPerfil(const std::string& rutaFile, ProfileList& ListaPerfiles){
             }
     
             // Validación de permisos
-            if (permiso >= 1 && permiso <= 4) 
+            if (permiso >= 1 && permiso <= 7) 
             {
                 bool existe = false;
                 for (int valor : newProfile.permisosMenu){
@@ -555,7 +571,8 @@ bool creaPerfil(const std::string& rutaFile, ProfileList& ListaPerfiles){
             }
         } while (permiso != 0);
 
-    // newProfile.permisosMenu.push_back(0);
+    // Ordenar permisos antes de guardar el perfil
+    std::sort(newProfile.permisosMenu.begin(), newProfile.permisosMenu.end());
 
     //Agregar nuevo perfil a listaPerfiles
     int opc;

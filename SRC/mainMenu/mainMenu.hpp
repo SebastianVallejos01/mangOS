@@ -3,4 +3,4 @@
 #include "../mates/mates.hpp"
 #include "../texto/texto.hpp"
 
-void mainMenu(const User& loggedUser, const std::string& userRuta, const std::string& rutaUserFile, const std::string& rutaPerfilFile, UserList& ListaUsuarios, ProfileList& ListaPerfiles);
+void mainMenu(const User& loggedUser, const Profile& loggedProfile, const std::string& userRuta, const std::string& rutaUserFile, const std::string& rutaPerfilFile, UserList& ListaUsuarios, ProfileList& ListaPerfiles);

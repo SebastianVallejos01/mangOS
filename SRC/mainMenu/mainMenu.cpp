@@ -4,42 +4,42 @@
 #include <string>
 #include <limits>
 
-void mainMenu(const User& loggedUser, const std::string& userRuta, const std::string& rutaUserFile, const std::string& rutaPerfilFile, UserList& ListaUsuarios, ProfileList& ListaPerfiles){
-    int option = 0;
+void mainMenu(const User& loggedUser, const Profile& loggedProfile, const std::string& userRuta, const std::string& rutaUserFile, const std::string& rutaPerfilFile, UserList& ListaUsuarios, ProfileList& ListaPerfiles){
+    int opcion = 0;
 
     do {
         std::cout << "\n========================================" << std::endl;
-        std::cout << "            MENÚ PRINCIPAL              " << std::endl;
+        std::cout << "         MENÚ PRINCIPAL mangOS          " << std::endl;
         std::cout << "========================================" << std::endl;
         std::cout << "Usuario: " << loggedUser.username << std::endl;
-        std::cout << "Perfil:  " << loggedUser.perfil << std::endl;
+        std::cout << "Perfil:  " << loggedProfile.name << std::endl;
         std::cout << "----------------------------------------" << std::endl;
         std::cout << "1. Administración de usuarios y perfiles" << std::endl;
         std::cout << "2. Multiplica matrices NxM" << std::endl;
         std::cout << "3. Juego" << std::endl;
         std::cout << "4. ¿Es palíndromo?" << std::endl;
-        std::cout << "5. Calcular f(x) = x*x + 2x + 8" << std::endl;
+        std::cout << "5. Calcular f(x) = x^2 + 2x + 8" << std::endl;
         std::cout << "6. Conteo sobre texto" << std::endl;
         std::cout << "7. Conteo sobre archivo" << std::endl;
         std::cout << "0. Salir" << std::endl;
         std::cout << "========================================" << std::endl;
         std::cout << "Seleccione una opción: ";
 
-        while (!(std::cin >> option)) {
+        while (!(std::cin >> opcion)) {
             std::cout << "Entrada inválida. Intente nuevamente: ";
             std::cin.clear();
             std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         }
         std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
-        switch (option) {
+        switch (opcion) {
             case 1:
-                if (loggedUser.perfil == "ADMIN") {
+                if (hasPermiso(loggedProfile, 1)) { // Verifica si el perfil tiene permiso para acceder a la administración
                     std::cout << "\n=== ADMINISTRACIÓN DE USUARIOS Y PERFILES ===" << std::endl;
                     std::cout << "Llamando al sistema correspondiente..." << std::endl;
                     menuUserManager(rutaUserFile, rutaPerfilFile, ListaUsuarios, ListaPerfiles);
                 } else {
-                    std::cout << "\nAcceso denegado: esta opción solo puede ser usada por el perfil ADMIN." << std::endl;
+                    std::cout << "\nAcceso denegado: Permisos de usuario insuficientes." << std::endl;
                 }
                 break;
 
@@ -78,10 +78,10 @@ void mainMenu(const User& loggedUser, const std::string& userRuta, const std::st
                 break;
         }
 
-        if (option != 0) {
+        if (opcion != 0) {
             std::cout << "\nPresione Enter para continuar...";
             std::cin.get();
         }
 
-    } while (option != 0);
+    } while (opcion != 0);
 }

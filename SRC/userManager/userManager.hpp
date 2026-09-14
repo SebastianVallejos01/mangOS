@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include <string>
 #include <vector>
 #include <iostream>
@@ -88,6 +89,21 @@ std::string limpiarString(const std::string& str);
  */
 std::optional<std::string> getEnvVar(const fs::path& rutaEnv, const std::string& clave);
 
+/**
+ * @brief Verifica si un perfil tiene un permiso específico.
+ * @param p El perfil a verificar.
+ * @param permiso El permiso a buscar.
+ * @return true si el perfil tiene el permiso, false en caso contrario.
+ */
+bool hasPermiso(const Profile& p, const int& permiso);
+
+/**
+ * @brief Obtiene un perfil específico de la lista de perfiles.
+ * @param listaPerfiles La lista de perfiles.
+ * @param nombrePerfil El nombre del perfil a buscar.
+ * @return El perfil si es encontrado, de lo contrario std::nullopt.
+ */
+std::optional<Profile> getPerfil(const ProfileList& listaPerfiles, const std::string& nombrePerfil);
 
 
 //Menú/Submenus

@@ -37,12 +37,18 @@ int main(int argc, char* argv[]) {
     leePerfilesTxt(valorEnvPerfil.value(), ListaPerfiles);
     leeUsuariosTxt(valorEnvUsuario.value(), ListaUsuarios, ListaPerfiles);
     std::cout<<"Archivos cargados con éxito.\n"<<std::endl;
+    
 
     //Validación de credenciales
     loggedUser = validaLogin(userName, passWord, ListaUsuarios);
     if (!loggedUser) return 1;
-    //menuUserManager(valorEnvUsuario.value(), valorEnvPerfil.value(), ListaUsuarios, ListaPerfiles);
-    mainMenu(*loggedUser, userRuta, valorEnvUsuario.value(), valorEnvPerfil.value(), ListaUsuarios, ListaPerfiles);
 
+    // Obtener el perfil del usuario que ha iniciado sesión
+    auto loggedProfile = getPerfil(ListaPerfiles, loggedUser->perfil);
+    if (!loggedProfile) return 1;
+
+    mainMenu(*loggedUser, *loggedProfile, userRuta, valorEnvUsuario.value(), valorEnvPerfil.value(), ListaUsuarios, ListaPerfiles);
+    
+    //menuUserManager(valorEnvUsuario.value(), valorEnvPerfil.value(), ListaUsuarios, ListaPerfiles);
     return 0;
 }
