@@ -4,7 +4,7 @@
 #include <vector>
 #include <string>
 #include <stdexcept>
-#include <windows.h>
+//#include <windows.h>
 
 // Función para leer y parsear una matriz desde un archivo de texto
 std::vector<std::vector<double>> leerMatriz(const std::string& ruta, const char delimitador) {
@@ -70,7 +70,7 @@ void imprimirMatriz(const std::vector<std::vector<double>>& matriz) {
 }
 
 int main(int argc, char* argv[]) {
-    SetConsoleOutputCP(CP_UTF8);
+    // SetConsoleOutputCP(CP_UTF8);
     // Validar la cantidad de argumentos
     // ./multiplicador <rutaA> <rutaB> <separador> <username> <profile>
     if (argc != 6) {

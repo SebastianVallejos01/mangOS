@@ -1,10 +1,5 @@
 #include "mainMenu.hpp"
 
-#include <iostream>
-#include <string>
-#include <limits>
-#include <cstdlib>
-
 void mainMenu(const User& loggedUser, const Profile& loggedProfile, const std::string& userRuta, const std::string& rutaUserFile, const std::string& rutaPerfilFile, UserList& ListaUsuarios, ProfileList& ListaPerfiles){
     int opcion = 0;
 
@@ -60,7 +55,7 @@ void mainMenu(const User& loggedUser, const Profile& loggedProfile, const std::s
                 }
 
                 // Llamada de sistema al programa independiente "multi" (multi.exe en Windows)
-                std::string comando = "multi.exe \"" + rutaA + "\" \"" + rutaB + "\" \"" + separador + "\" \"" + loggedUser.username + "\" \"" + loggedProfile.name + "\"";
+                std::string comando = "./multi \"" + rutaA + "\" \"" + rutaB + "\" \"" + separador + "\" \"" + loggedUser.username + "\" \"" + loggedProfile.name + "\"";
                 std::cout << "Ejecutando: " << comando << "\n" << std::endl;
                 int result = system(comando.c_str());
                 

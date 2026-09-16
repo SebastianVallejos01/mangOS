@@ -2,7 +2,7 @@
 
 # 1. Nombre del ejecutable final
 TARGET = mangOS
-MULTI_TARGET = multi.exe
+MULTI_TARGET = multi
 
 # 2. Compilador y banderas (flags)
 CXX = g++
