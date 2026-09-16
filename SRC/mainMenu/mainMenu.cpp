@@ -3,6 +3,7 @@
 #include <iostream>
 #include <string>
 #include <limits>
+#include <cstdlib>
 
 void mainMenu(const User& loggedUser, const Profile& loggedProfile, const std::string& userRuta, const std::string& rutaUserFile, const std::string& rutaPerfilFile, UserList& ListaUsuarios, ProfileList& ListaPerfiles){
     int opcion = 0;
@@ -43,11 +44,31 @@ void mainMenu(const User& loggedUser, const Profile& loggedProfile, const std::s
                 }
                 break;
 
-            case 2:
+            case 2: {
                 std::cout << "\n=== MULTIPLICA MATRICES NxM ===" << std::endl;
-                std::cout << "Debe leer los archivos de texto con las matrices desde otro programa." << std::endl;
-                break;
+                std::string rutaA, rutaB, separador;
+                std::cout << "Ingrese la ruta de la matriz A: ";
+                std::getline(std::cin, rutaA);
+                std::cout << "Ingrese la ruta de la matriz B: ";
+                std::getline(std::cin, rutaB);
+                std::cout << "Ingrese el caracter separador: ";
+                std::getline(std::cin, separador);
 
+                if (rutaA.empty() || rutaB.empty() || separador.empty()) {
+                    std::cout << "Error: Todos los campos son obligatorios." << std::endl;
+                    break;
+                }
+
+                // Llamada de sistema al programa independiente "multi" (multi.exe en Windows)
+                std::string comando = "multi.exe \"" + rutaA + "\" \"" + rutaB + "\" \"" + separador + "\" \"" + loggedUser.username + "\" \"" + loggedProfile.name + "\"";
+                std::cout << "Ejecutando: " << comando << "\n" << std::endl;
+                int result = system(comando.c_str());
+                
+                if (result != 0) {
+                    std::cout << "\nEl programa externo finalizó con código de error o no pudo ser encontrado." << std::endl;
+                }
+                break;
+            }
             case 3:
                 std::cout << "\n=== JUEGO ===" << std::endl;
                 std::cout << "Mensaje en construcción." << std::endl;
