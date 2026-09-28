@@ -22,13 +22,30 @@
 **4\. Instrucciones Rápidas de Uso**
 -------------------------------------
 
-**Arranque del Sistema** Al ejecutar el programa (mediante ./mangOS), el sistema cargará silenciosamente la configuración, verifica la base de datos y restaura los perfiles esenciales si es necesario. Inmediatamente después, se despliega el menú principal.
+**Arranque y Autenticación del Sistema**
+Para ejecutar el programa, debes identificarte obligatoriamente a través de la terminal, usando los flags de argumento requeridos.
+Ejecuta el programa con:
+`./mangOS -u <usuario> -p <contraseña> -f <ruta_archivo>`
+
+* Ejemplo: `./mangOS -u admin -p 1234 -f Makefile`
+El sistema verificará las credenciales y el archivo; luego cargará silenciosamente la configuración, verificará la base de datos y desplegará el **Menú Principal**.
 
 **Navegación Básica**
 
 * Para moverse por los menús, escriba el **número** de la opción deseada y presione Enter.
-* Utilice siempre el número 0 para retroceder al menú anterior o para apagar el sistema.
-* El sistema está protegido contra errores de tipeo: si ingresa una letra o símbolo por accidente, la consola ignorará la entrada y volverá a mostrar la pregunta sin cerrarse.
+* Utilice siempre el número 0 para retroceder al menú anterior o para salir/apagar el sistema.
+* El sistema está protegido contra errores de tipeo: si ingresa una letra o símbolo por accidente, la consola ignorará la entrada y volverá a iterar.
+
+**Menú Principal y Nuevas Funciones**
+
+El núcleo del SO se controla a través de un Menú Principal con varias opciones (Módulo de usuarios, Cálculos, Palíndromos, Conteo de texto, etc). 
+* **Multiplicación de Matrices (Opción 2):** 
+  Si ingresa a esta opción, se le solicitará ingresar:
+  1. La ruta de la Matriz A (ej. `BD/Matrices/M1.TXT`).
+  2. La ruta de la Matriz B (ej. `BD/Matrices/N1.TXT`).
+  3. El carácter separador (ej. `#`).
+  
+  El programa procesará esta operación invocando dinámicamente un ejecutable externo (`multi`), logrando así la multiplicación de matrices en un subproceso aislado.
 
 **Módulo de Usuarios**
 
