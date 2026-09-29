@@ -66,7 +66,7 @@ void mainMenu(const User& loggedUser, const Profile& loggedProfile, const std::s
             }
             case 3:
                 std::cout << "\n=== JUEGO ===" << std::endl;
-                std::cout << "Mensaje en construcción." << std::endl;
+                std::cout << "En construcción. Funcionalidad futura." << std::endl;
                 break;
 
             case 4:

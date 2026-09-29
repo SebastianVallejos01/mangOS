@@ -21,19 +21,24 @@ void menuPalindromo() {
 bool esPalindromo(const std::string& entrada){
 
     std::string palabra;
+    // Se prepara una copia para comparar, sin modificar la entrada original.
     palabra.reserve(entrada.size());
 
     for (unsigned char c : entrada) {
+        // Se omiten únicamente los espacios; los símbolos especiales se conservan.
         if (std::isspace(c)) continue;
         palabra.push_back(static_cast<char>(c));
     }
 
+    // Se ignoran diferencias entre mayúsculas y minúsculas.
     std::transform(palabra.begin(), palabra.end(), palabra.begin(),
                    [](unsigned char c) { return std::tolower(c); });
 
+    // Una cadena vacía no cuenta como palíndromo; una sola posición sí.
     if (palabra.empty()) return false;
     if (palabra.length() == 1) return true;
 
+    // Se comparan los extremos hacia el centro; cualquier diferencia lo descarta.
     int init = 0;
     int fin = palabra.length() - 1;
 
@@ -46,6 +51,7 @@ bool esPalindromo(const std::string& entrada){
 }
 
 void conteoTexto(const std::string& ruta) {
+    // Se abre el archivo y se carga todo su contenido para analizarlo.
     std::ifstream archivo(ruta);
     if (!archivo.is_open()) {
         std::cout << "Error: No se pudo abrir el archivo en la ruta proporcionada.\n";
@@ -55,13 +61,16 @@ void conteoTexto(const std::string& ruta) {
     std::string contenido((std::istreambuf_iterator<char>(archivo)), std::istreambuf_iterator<char>());
     archivo.close();
 
+    // Se inicializan los contadores para vocales, consonantes, caracteres especiales y palabras.
     int numVocales = 0;
     int numConsonantes = 0;
     int numCaracteresEspeciales = 0;
     int numPalabras = 0;
-    bool enPalabra = false;
+    bool enPalabra = false; // Indica si actualmente se está dentro de una palabra.
     std::string opcion;
 
+    // Cada carácter se clasifica como letra, espacio o carácter especial.
+    // Un carácter numérico no se considera ni vocal ni consonante, pero sí contribuye al conteo de palabras si está dentro de una secuencia alfanumérica.
     for (unsigned char c : contenido) {
         if (std::isalnum(c)) {
             char letra = static_cast<char>(std::tolower(c));
@@ -73,6 +82,7 @@ void conteoTexto(const std::string& ruta) {
             }
             enPalabra = true;
         } else if (std::isspace(c)) {
+            // Un espacio finaliza la palabra que se estaba contando.
             if (enPalabra) {
                 numPalabras++;
                 enPalabra = false;
@@ -82,6 +92,7 @@ void conteoTexto(const std::string& ruta) {
         }
     }
 
+    // Cuenta también la última palabra si el archivo no termina con espacio.
     if (enPalabra) numPalabras++;
 
     std::cout << "\n--- Resumen de Conteo de Texto ---\n";
@@ -92,6 +103,7 @@ void conteoTexto(const std::string& ruta) {
     std::cout << "Cantidad de palabras: " << numPalabras << "\n";
     std::cout << "--------------------------------\n";
 
+    // El resumen permanece visible hasta que el usuario introduce 0.
     do{
         std::cout << "\nIngrese '0' para salir: ";
         std::getline(std::cin, opcion);
