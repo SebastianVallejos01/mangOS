@@ -34,7 +34,7 @@ Ejecuta el programa con:
 
 * Para moverse por los menús, escriba el **número** de la opción deseada y presione Enter.
 * Utilice siempre el número 0 para retroceder al menú anterior o para salir/apagar el sistema.
-  * Lo anterior vale para todas las funcionalidades a excepción de las opciones 2 (multiplicación de matrices), que retrocede automáticamtente, y 5 (cálculo de función polinómica) ya que acepta la preimagen 0. De este último apartado se puede salir con una entrada no numérica. Por ejemplo, una letra "a".
+  * Lo anterior vale para todas las funcionalidades a excepción de las opciones 2 (multiplicación de matrices), que retrocede automáticamente, y 5 (cálculo de función polinómica) ya que acepta la preimagen 0. De este último apartado se puede salir con una entrada no numérica. Por ejemplo, una letra "a".
   * Para salir de cada submenú del menú principal, necesitará un "enter" adicional después del 0.
 * El sistema está protegido contra errores de tipeo: si ingresa un símbolo incorrecto por accidente, la consola ignorará la entrada y volverá a iterar. Esto solo aplica para los menús. En caso de ingresar una ruta de archivo inválida, el sistema informará que no fue encontrada y podrá volver a intentar.
 
