@@ -16,7 +16,7 @@ El proyecto tiene como propósito principal simular el núcleo de un Sistema Ope
 
 Actualmente, el sistema implementa un menú principal protegido por credenciales y un completo módulo de gestión de identidades:
 
-- **Autenticación por Consola:** Ingreso seguro al sistema requiriendo usuario, contraseña y un archivo de configuración mediante argumentos de ejecución.
+- **Autenticación por Consola:** Ingreso seguro al sistema requiriendo usuario, contraseña y un archivo de lectura, mediante argumentos de ejecución.
 - **Menú Principal y Multiprocesamiento:** Ejecución de funcionalidades avanzadas (como la multiplicación de matrices NxM) delegando el trabajo a procesos externos (programas hijos) invocados mediante el sistema.
 - **Gestión de Usuarios:**
   - Creación, listado y eliminación de usuarios con credenciales únicas.
@@ -72,7 +72,7 @@ make
 
 ### 4. Ejecución
 
-Una vez compilado y con el archivo `.env` en el mismo directorio (o en la ruta esperada), el programa exige que te identifiques mediante argumentos de consola. 
+Una vez compilado y con el archivo `.env` en el mismo directorio (o en la ruta esperada), el programa exige que te identifiques mediante argumentos de consola.
 
 Ejecute el siguiente comando reemplazando con sus credenciales:
 
@@ -81,6 +81,7 @@ Ejecute el siguiente comando reemplazando con sus credenciales:
 ```
 
 Ejemplo:
+
 ```bash
 ./mangOS -u admin -p admin123 -f Makefile
 ```
