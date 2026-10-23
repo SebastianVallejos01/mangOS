@@ -58,11 +58,10 @@ _Nota de seguridad:_ Solo los perfiles con la opción 1 dentro de sus permisos t
 
 **2. Multiplicación de matrices NxM**
 
-Si ingresa a esta opción, se le solicitará ingresar:
-
-1. La ruta de la Matriz A (ej. `BD/Matrices/M1.TXT`).
-2. La ruta de la Matriz B (ej. `BD/Matrices/N1.TXT`).
-3. El carácter separador (ej. `#`).
+Al ingresar a esta opción, se presenta un submenú con las siguientes alternativas:
+* **1. Trabajar con los valores del .env:** Carga automáticamente las rutas de las matrices (`MATRIZ_A` y `MATRIZ_B`) y el separador definidos en el archivo `.env`.
+* **2. Ingresar las rutas manualmente:** Permite ingresar por consola la ruta de la Matriz A (ej. `BD/Matrices/M1.TXT`), la ruta de la Matriz B (ej. `BD/Matrices/N1.TXT`) y el carácter delimitador (ej. `#`).
+* **0. Volver:** Regresa al menú principal.
 
 El programa procesará esta operación invocando dinámicamente un ejecutable externo (`multi`), logrando así la multiplicación de matrices en un subproceso aislado.
 
@@ -72,7 +71,10 @@ En construcción. Funcionalidad futura.
 
 **4. ¿Es palíndromo?**
 
-Recibe una cadena de caracteres ingresada por el usuario. Omite espacios y trata mayúsculas y minúsculas por igual. Conserva caracteres numéricos y símbolos especiales. Recorre la cadena desde los extremos hasta el centro verificando que sea palíndromo. Devuelve falso para una cadena vacía y verdadero para un caracter solo. Ingrese 0 para salir.
+Al ingresar a esta opción desde el menú principal, se presentan dos opciones:
+* **1. Elegir palabra:** Despliega el menú interactivo para ingresar cadenas de texto a verificar (ingrese 0 para terminar y volver a las opciones de palíndromo). Omite espacios y trata mayúsculas y minúsculas por igual. Conserva caracteres numéricos y símbolos especiales. Recorre la cadena desde los extremos hasta el centro verificando que sea palíndromo. Devuelve falso para una cadena vacía y verdadero para un caracter solo.
+* **0. Volver:** Regresa al menú principal.
+
 
 **5. Calcular f(x)=x*x + 2x + 8**
 

@@ -29,6 +29,13 @@ int main(int argc, char* argv[]) {
     // Validar si se encontraron las variables de entorno
     if (!valorEnvPerfil || !valorEnvUsuario) return 1;
 
+    valorEnvMatrizA = getEnvVar(rutaEnv, "MATRIZ_A");
+    if (!valorEnvMatrizA) valorEnvMatrizA = getEnvVar(rutaEnv, "RUTA_MATRIZ_A");
+    valorEnvMatrizB = getEnvVar(rutaEnv, "MATRIZ_B");
+    if (!valorEnvMatrizB) valorEnvMatrizB = getEnvVar(rutaEnv, "RUTA_MATRIZ_B");
+    valorEnvSeparador = getEnvVar(rutaEnv, "SEPARADOR_MATRICES");
+    if (!valorEnvSeparador) valorEnvSeparador = getEnvVar(rutaEnv, "SEPARADOR");
+
     // Crear listas de perfiles y usuarios
     ProfileList ListaPerfiles;
     UserList ListaUsuarios;

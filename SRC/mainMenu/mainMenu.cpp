@@ -18,6 +18,7 @@ void mainMenu(const User& loggedUser, const Profile& loggedProfile, const std::s
         std::cout << "5. Calcular f(x) = x^2 + 2x + 8" << std::endl;
         std::cout << "6. Conteo sobre texto" << std::endl;
         std::cout << "7. Conteo sobre archivo" << std::endl;
+        std::cout << "8. Crear índice invertido de libros" << std::endl;
         std::cout << "0. Salir" << std::endl;
         std::cout << "========================================" << std::endl;
         std::cout << "Seleccione una opción: ";
@@ -39,31 +40,10 @@ void mainMenu(const User& loggedUser, const Profile& loggedProfile, const std::s
                     menuUserManager(rutaUserFile, rutaPerfilFile, ListaUsuarios, ListaPerfiles);
                     break;
 
-                case 2: {
-                    std::cout << "\n=== MULTIPLICA MATRICES NxM ===" << std::endl;
-                    std::string rutaA, rutaB, separador;
-                    std::cout << "Ingrese la ruta de la matriz A: ";
-                    std::getline(std::cin, rutaA);
-                    std::cout << "Ingrese la ruta de la matriz B: ";
-                    std::getline(std::cin, rutaB);
-                    std::cout << "Ingrese el caracter separador: ";
-                    std::getline(std::cin, separador);
-
-                    if (rutaA.empty() || rutaB.empty() || separador.empty()) {
-                        std::cout << "Error: Todos los campos son obligatorios." << std::endl;
-                        break;
-                    }
-
-                    // Llamada de sistema al programa independiente "multi" (multi.exe en Windows)
-                    std::string comando = "./multi \"" + rutaA + "\" \"" + rutaB + "\" \"" + separador + "\" \"" + loggedUser.username + "\" \"" + loggedProfile.name + "\"";
-                    std::cout << "Ejecutando: " << comando << "\n" << std::endl;
-                    int result = system(comando.c_str());
-                    
-                    if (result != 0) {
-                        std::cout << "\nEl programa externo finalizó con código de error o no pudo ser encontrado." << std::endl;
-                    }
+                case 2:
+                    menuMatrices(loggedUser, loggedProfile);
                     break;
-                }
+
                 case 3:
                     std::cout << "\n=== JUEGO ===" << std::endl;
                     std::cout << "En construcción. Funcionalidad futura." << std::endl;
@@ -83,6 +63,11 @@ void mainMenu(const User& loggedUser, const Profile& loggedProfile, const std::s
 
                 case 7:
                     menuConteoTexto();
+                    break;
+
+                case 8:
+                    std::cout << "\n=== CREAR ÍNDICE INVERTIDO DE LIBROS ===" << std::endl;
+                    std::cout << "En construcción. Funcionalidad futura." << std::endl;
                     break;
 
                 case 0:

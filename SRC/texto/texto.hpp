@@ -6,6 +6,7 @@
 #include <cctype>
 #include <fstream>
 #include <iterator>
+#include <limits>
 
 /**
  * @brief Función que muestra el menú de opciones para verificar si una palabra o frase es un palíndromo.

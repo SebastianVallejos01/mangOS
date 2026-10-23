@@ -2,21 +2,45 @@
 
 
 void menuPalindromo() {
-    std::string entrada;
-    std::cout << "\n--- Verificación de Palíndromo ---\n";
-    std::cout << "Ingrese una palabra o frase (0 para terminar): ";
-    std::getline(std::cin, entrada);
+    int opcion = 0;
+    do {
+        std::cout << "\n--- Verificación de Palíndromo ---\n";
+        std::cout << "1. Elegir palabra\n";
+        std::cout << "0. Volver\n";
+        std::cout << "Seleccione una opción: ";
 
-    while (entrada != "0") {
-        if (esPalindromo(entrada))
-            std::cout << "'" << entrada << "' es un palíndromo.\n";
-        else
-            std::cout << "'" << entrada << "' no es un palíndromo.\n";
+        if (!(std::cin >> opcion)) {
+            std::cout << "Entrada inválida. Intente nuevamente.\n";
+            std::cin.clear();
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            continue;
+        }
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
-        std::cout << "Ingrese otra palabra o frase (o '0' para terminar): ";
-        std::getline(std::cin, entrada);
-    }
+        if (opcion == 1) {
+            std::string entrada;
+            std::cout << "\n--- Verificación de Palíndromo ---\n";
+            std::cout << "Ingrese una palabra o frase (0 para terminar): ";
+            std::getline(std::cin, entrada);
+
+            while (entrada != "0") {
+                if (esPalindromo(entrada))
+                    std::cout << "'" << entrada << "' es un palíndromo.\n";
+                else
+                    std::cout << "'" << entrada << "' no es un palíndromo.\n";
+
+                std::cout << "Ingrese otra palabra o frase (o '0' para terminar): ";
+                std::getline(std::cin, entrada);
+            }
+        } else if (opcion == 0) {
+            std::cout << "\nVolviendo al menú principal...\n";
+            break;
+        } else {
+            std::cout << "\nOpción no válida. Intente nuevamente.\n";
+        }
+    } while (opcion != 0);
 }
+
 
 bool esPalindromo(const std::string& entrada){
 
