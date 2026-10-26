@@ -15,7 +15,7 @@ else
     CXX = g++
 endif
 
-CXXFLAGS = -Wall -Wextra -std=c++17 -static -I./SRC
+CXXFLAGS = -Wall -Wextra -std=c++17 -pthread -static -I./SRC
 
 # 3. Búsqueda automática de archivos fuente
 # Esto buscará cualquier archivo .cpp dentro de cualquier subcarpeta de SRC, excluyendo matrices.cpp

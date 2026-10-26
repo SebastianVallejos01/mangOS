@@ -1,15 +1,11 @@
 #pragma once
-#include <iostream>
-#include <string>
-#include <vector>
 #include <queue>
 #include <map>
 #include <thread>
 #include <semaphore.h> // Semáforos POSIX clásicos para OS
 #include <mutex>       // Para proteger secciones críticas simples
-#include <filesystem>
-#include <fstream>
-#include <optional>
+#include <cctype>
+#include "../userManager/userManager.hpp"
 
 namespace fs = std::filesystem;
 
@@ -20,8 +16,10 @@ struct Libro {
     std::string ruta;
 };
 
+
+
 // 2. Variables Globales Compartidas (Estado Compartido)
-// Nota: Se declaran como 'inline' (C++17) o se usa 'extern' para compartirlas entre los threads
+// Nota: Se declaran como 'inline' para compartirlas entre los threads
 inline std::queue<Libro> colaTrabajo;
 inline bool procesamientoActivo = true; // Flag para avisar a los threads cuándo detenerse
 
@@ -34,19 +32,43 @@ inline sem_t sem_elementos_cola; // Contador: ¿Cuántos libros hay en la cola?
 inline std::mutex mtx_cola;      // Exclusión mutua: Proteger push/pop de la cola
 inline std::mutex mtx_indice;    // Exclusión mutua: Proteger escritura en indiceGlobal
 
-// 5. Firmas de Funciones Principales
+// 5. Estructura de Configuración del Módulo
+struct ConfiguracionIndex {
+    fs::path rutaLibros;
+    fs::path rutaIdLibros;
+    fs::path rutaIndice;
+    int nThreads;
+};
+
+// 6. Declaraciones de Funciones Principales
+
+
 /**
- * @brief Inicia todo el proceso: lee variables de entorno, mapea libros, 
+ * @brief Muestra el submenú para crear el índice invertido y maneja la interacción con el usuario.
+ */
+void submenuIndex();
+
+/**
+ * @brief Lee y valida las variables de entorno necesarias para el índice.
+ * @param rutaEnv Ruta del archivo .env resuelto.
+ * @return Struct con las rutas y número de threads validados, o std::nullopt si alguna falla.
+ */
+std::optional<ConfiguracionIndex> cargarConfiguracionIndex(const fs::path& rutaEnv);
+
+/**
+ * @brief Inicia todo el proceso: valida entorno, mapea libros, 
  *        crea la cola, lanza los threads y guarda los resultados. (Llamada desde Opción 8)
  */
 void crearIndiceInvertido();
 
 /**
- * @brief Ciclo de vida del thread trabajador.
+ * @brief Ciclo de vida del thread trabajador (Consumidor).
+ * @param idThread Identificador numérico del hilo para trazabilidad (opcional).
  */
 void workerThread(int idThread);
 
 /**
- * @brief Limpia el texto, cuenta palabras y actualiza el índice global.
+ * @brief Lee el texto del libro, extrae y limpia las palabras, y actualiza el índice global.
+ * @param libro Struct con la información y ruta del libro a procesar.
  */
 void procesarLibro(const Libro& libro);

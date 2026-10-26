@@ -2,6 +2,7 @@
 #include "../userManager/userManager.hpp"
 #include "../mates/mates.hpp"
 #include "../texto/texto.hpp"
+#include "../index/index.hpp"
 
 #include <limits>
 

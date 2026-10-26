@@ -66,8 +66,7 @@ void mainMenu(const User& loggedUser, const Profile& loggedProfile, const std::s
                     break;
 
                 case 8:
-                    std::cout << "\n=== CREAR ÍNDICE INVERTIDO DE LIBROS ===" << std::endl;
-                    std::cout << "En construcción. Funcionalidad futura." << std::endl;
+                    submenuIndex();
                     break;
 
                 case 0:
