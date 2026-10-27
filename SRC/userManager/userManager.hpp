@@ -66,6 +66,11 @@ inline std::optional<std::string> valorEnvUsuario;
 inline std::optional<std::string> valorEnvPerfil;
 
 /**
+ * @brief Variable global que almacena el valor de la variable de entorno "LOG_FILE" si es encontrada en el archivo .env.
+ */
+inline std::optional<std::string> valorEnvLog;
+
+/**
  * @brief Variable global que almacena el valor de la variable de entorno "MATRIZ_A" si es encontrada en el archivo .env.
  */
 inline std::optional<std::string> valorEnvMatrizA;
