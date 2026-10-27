@@ -9,7 +9,7 @@
 
 namespace fs = std::filesystem;
 
-// 1. Estructura para identificar cada libro
+// Estructura para identificar cada libro
 struct Libro {
     int id;
     std::string nombre;
@@ -18,21 +18,21 @@ struct Libro {
 
 
 
-// 2. Variables Globales Compartidas (Estado Compartido)
-// Nota: Se declaran como 'inline' para compartirlas entre los threads
+// Variables Globales Compartidas (Estado Compartido)
+// Se declaran como 'inline' para compartirlas entre los threads
 inline std::queue<Libro> colaTrabajo;
 inline bool procesamientoActivo = true; // Flag para avisar a los threads cuándo detenerse
 
-// 3. Estructura del Índice Invertido Global
+// Estructura del Índice Invertido Global
 // Mapa de: Palabra -> Mapa de (ID_Libro -> Frecuencia)
 inline std::map<std::string, std::map<int, int>> indiceGlobal;
 
-// 4. Semáforos y Mutex (Secciones Críticas)
-inline sem_t sem_elementos_cola; // Contador: ¿Cuántos libros hay en la cola?
+// Semáforos y Mutex (Secciones Críticas)
+inline sem_t sem_elementos_cola; // Contador: Cantidad de libros en la cola
 inline std::mutex mtx_cola;      // Exclusión mutua: Proteger push/pop de la cola
 inline std::mutex mtx_indice;    // Exclusión mutua: Proteger escritura en indiceGlobal
 
-// 5. Estructura de Configuración del Módulo
+// Estructura de Configuración del Módulo
 struct ConfiguracionIndex {
     fs::path rutaLibros;
     fs::path rutaIdLibros;
@@ -44,8 +44,7 @@ struct ConfiguracionIndex {
 
 
 /**
- * @brief Muestra el submenú para crear el índice invertido y maneja la interacción con el usuario.
- */
+ * @brief Muestra el submenú para crear el índice invertido y permite al usuario devolverse de ser requerido*/
 void submenuIndex();
 
 /**
@@ -57,7 +56,7 @@ std::optional<ConfiguracionIndex> cargarConfiguracionIndex(const fs::path& rutaE
 
 /**
  * @brief Inicia todo el proceso: valida entorno, mapea libros, 
- *        crea la cola, lanza los threads y guarda los resultados. (Llamada desde Opción 8)
+ *        crea la cola, lanza los threads y guarda los resultados.
  */
 void crearIndiceInvertido();
 

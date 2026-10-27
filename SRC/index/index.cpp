@@ -63,7 +63,7 @@ std::optional<ConfiguracionIndex> cargarConfiguracionIndex(const fs::path& rutaE
 void crearIndiceInvertido() {
     std::cout << "\n--- INICIANDO CREACIÓN DE ÍNDICE INVERTIDO ---\n";
 
-    // 1. Cargar y validar variables de entorno
+    // Cargar y validar variables de entorno
     // Pasamos la ruta actual para buscar el .env dinámicamente
     auto configOpt = cargarConfiguracionIndex(getEnvFile(fs::current_path(), ".env"));
     if (!configOpt) {
@@ -72,20 +72,20 @@ void crearIndiceInvertido() {
     }
     ConfiguracionIndex config = configOpt.value();
 
-    // 2. Limpiar estructuras globales por si se ejecuta múltiples veces en la misma sesión
+    // Limpiar estructuras globales por si se ejecuta múltiples veces en la misma sesión
     while (!colaTrabajo.empty()) {
         colaTrabajo.pop();
     }
     indiceGlobal.clear();
 
-    // 3. Abrir archivo de mapeo ID;Nombre
+    // Abrir archivo de mapeo ID;Nombre
     std::ofstream archivoIds(config.rutaIdLibros, std::ios::trunc);
     if (!archivoIds.is_open()) {
         std::cout << "Error: No se pudo crear el archivo " << config.rutaIdLibros.string() << "\n";
         return;
     }
 
-    // 4. Leer directorio, poblar la cola de trabajo y el archivo de IDs
+    // Leer directorio, poblar la cola de trabajo y el archivo de IDs
     int contadorId = 1;
     for (const auto& entry : fs::directory_iterator(config.rutaLibros)) {
         if (entry.is_regular_file() && entry.path().extension() == ".txt") {
@@ -109,23 +109,23 @@ void crearIndiceInvertido() {
     }
     std::cout << "Se encontraron " << totalLibros << " libros. Iniciando " << config.nThreads << " threads...\n";
 
-    // 5. Inicializar Semáforo: Su valor inicial es la cantidad de libros en la cola
+    // Inicializar Semáforo: Su valor inicial es la cantidad de libros en la cola
     sem_init(&sem_elementos_cola, 0, totalLibros);
 
-    // 6. Lanzar Threads Trabajadores
+    // Lanzar Threads Trabajadores
     std::vector<std::thread> trabajadores;
     for (int i = 0; i < config.nThreads; ++i) {
         trabajadores.push_back(std::thread(workerThread, i + 1));
     }
 
-    // 7. Barrera de Sincronización: El main thread espera a que todos terminen
+    // Barrera de Sincronización: El main thread espera a que todos terminen
     for (auto& t : trabajadores) {
         if (t.joinable()) {
             t.join();
         }
     }
 
-    // 8. Construir el archivo de Índice Invertido final
+    // Construir el archivo de Índice Invertido final
     std::cout << "Threads finalizados. Escribiendo indice en disco...\n";
     std::ofstream archivoIndice(config.rutaIndice, std::ios::trunc);
     if (!archivoIndice.is_open()) {
@@ -145,7 +145,7 @@ void crearIndiceInvertido() {
         std::cout << "¡Exito! Indice invertido generado en: " << config.rutaIndice.string() << "\n";
     }
 
-    // 9. Destruir el semáforo al terminar de usarlo
+    // Destruir el semáforo al terminar de usarlo
     sem_destroy(&sem_elementos_cola);
 }
 
@@ -153,14 +153,14 @@ void crearIndiceInvertido() {
 
 void workerThread([[maybe_unused]]int idThread) {
     while (true) {
-        // 1. Uso del Semáforo
+        // Uso del Semáforo
         // sem_trywait intenta decrementar el semáforo. Si su valor es 0 (no quedan libros), 
         // retorna distinto de 0 y el ciclo se rompe, permitiendo que el hilo finalice de forma segura
         if (sem_trywait(&sem_elementos_cola) != 0) {
             break; 
         }
 
-        // 2. Sección Crítica 1: Extracción de la cola
+        // Sección Crítica 1: Extracción de la cola
         mtx_cola.lock();
         Libro libroActual = colaTrabajo.front();
         colaTrabajo.pop();
@@ -169,7 +169,7 @@ void workerThread([[maybe_unused]]int idThread) {
         //descomentar para debug
         //std::cout << "[Thread " << idThread << "] Procesando: " << libroActual.nombre << "\n";
 
-        // 3. Procesamiento paralelo (Fuera de los mutex para no bloquear a otros hilos)
+        // Procesamiento paralelo (Fuera de los mutex para no bloquear a otros hilos)
         procesarLibro(libroActual);
     }
 }
@@ -203,7 +203,7 @@ void procesarLibro(const Libro& libro) {
     }
     archivo.close();
 
-    // 4. Sección Crítica 2: Volcado de resultados al Índice Global
+    // Sección Crítica 2: Volcado de resultados al Índice Global
     // Una vez terminado el libro completo, se bloquea el índice global para actualizarlo
     mtx_indice.lock();
     for (const auto& par : conteoLocal) {
