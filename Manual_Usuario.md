@@ -67,7 +67,62 @@ El programa procesará esta operación invocando dinámicamente un ejecutable ex
 
 **3. Juego**
 
-En construcción. Funcionalidad futura.
+EL juego inicia una vez se llenan los 4 jugadores, la primera fase consiste en seleccionar tu equipo y tu clase. el juego es asimetrico por lo que es de 3 vs 1.
+Una vez seleccionado todo se procede al combate por turnos, cada jugador tiene un turno en el que tratará de derrotar a los miembros del equipo oponente.
+una vez se llegue a 0 la vida de todos los miembros de un equipo, el equipo que todavia tenga miembros vivos gana.
+
+Cada clase posee diferentes caracteristicas:
+
+    #Clase/Coloso: HP   ATK ATK.SP DEF DEF.SP
+	#"movimiento", Poder, Tipo, Cooldown
+
+___AVENTUREROS___ 
+Guerrero:	250	30	20	25	25
+		"Espadazo", 40, FISICO, Cooldown:0
+		"Corte Flamigero", 60, MAGICO, Cooldown:1
+		"Estocada al Ojo",100,FISICO,Cooldown:3
+	
+Paladin:	300	30	10	50	30
+	"Placaje", 25,FISICO,Cooldown:0
+	"Arremetida Propulsada", 50,FISICO,Cooldown:1
+	"Luz Santa", 60,MAGICO,2
+	"Descenso Final",80,FISICO,Cooldown:3
+	
+Mago:		220	15	45	20	50
+	"Bola de Fuego", 35, MAGICO, Cooldown:0
+	"Cuchillo Conjurado", 40,FISICO,Cooldown:1
+	"Explosión", 100,MAGICO,Cooldown:4
+	"Luz Sanadora", 80, CURACION, Cooldown:3
+	
+Asesino: 	200	45	30	20	20
+	"Tajo Diagonal", 35,FISICO,Cooldown:0
+	"Filo Electrico", 60,MAGICO,Cooldown:1
+	"Danza Incesante", 60,FISICO,Cooldown:1
+	"Analgesico", 40,CURACION,Cooldown:2
+
+___COLOSOS___
+DragonDorado:	1000	20	40	10	50
+	"Zarpa Gigante", 55, FISICO, Cooldown:2
+	"Rafaga de viento", 35, MAGICO, Cooldown:1)
+	"Escombros Gigantes", 60,FISICO,Cooldown:3
+	"Flama Dorada", 70, MAGICO, Cooldown:5
+
+SamuraiEterno:	800	50	30	20	20
+	"Corte Instantaneo", 55, FISICO, Cooldown:3
+	"Corte de Viento", 50, MAGICO,Cooldown: 3
+	"Ogro Celestial", 60,MAGICO,Cooldown:4
+	"Dragon Piroclastico", 70, MAGICO, Cooldown:5
+	"Cielo Azul", 95, FISICO,Cooldown: 6
+	
+LoboEclipse:	1300	30	30	50	10
+	"Embestida", 40, FISICO, Cooldown:0
+	"Trampa de Sombras",50 , MAGICO,Cooldown: 1
+	"Mordisco Sorpresa",60,FISICO,Cooldown: 2
+	"Luz de Luna", 400, CURACION, Cooldown:4
+
+
+Excepcion de Desconexion:
+Si un jugador se desconecta, la vida de dicho jugador es reducida a 0, y dependiendo del estado del juego despues de esto, este puede darse por finalizado.
 
 **4. ¿Es palíndromo?**
 

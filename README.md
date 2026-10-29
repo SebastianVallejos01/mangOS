@@ -139,3 +139,15 @@ mangOS
                 userManager.cpp # Lógica interactiva de usuarios y perfiles
                 userManager.hpp # Cabecera con declaración de estructuras (User, Profile)
 ```
+
+
+## Funcionamiento del Juego
+
+Una persona hará de servidor, luego las demás personas se conectaran a dicho servidor a través de la ip del servidor.
+El servidor abre sockets a los que los jugadores se conectarán para jugar y todos pueden actuar al mismo tiempo, al menos durante las fases de preparación, una vez iniciada la partida todo será regido por turnos en los cuales solo un jugador puede actuar a la vez, y cada jugador deberá esperar por su turno de actuar.
+
+En caso de desconexion durante las primeras fases de preparacion, el servidor regresará al estado de espera de jugadores, y una vez se vuelva a llenar proseguiran con las preparaciones. Si se desconectan durante la fase de batalla, el jugador simplemente perderá toda su vida y se avisará al resto de jugadores.
+
+El juego inicia cuando todas las preparaciones estan listas y finalizará cuando todos los miembros de algun equipo hayan sido derrotados.
+
+Las asignaciones de valores a los jugadores y sus acciones en batalla se almacenan en el archivo LOG.TXT
