@@ -9,14 +9,21 @@
 #include <netinet/in.h>
 #include <cstdlib> 
 #include <csignal> 
+#include "../../userManager/userManager.hpp"
 
 // ==========================================
 // FUNCIÓN AUXILIAR PARA GUARDAR LOGS
 // ==========================================
 void guardarLog(const std::string& mensaje) {
     // std::ios::app permite añadir texto sin borrar lo anterior.
-    // La carpeta debe existir previamente, como mencionaste.
-    std::ofstream archivo("BD/GAME/LOGS/LOG.TXT", std::ios::app);
+    // La carpeta debe existir previamente.
+    auto rutalog = getEnvVar(getEnvFile(fs::current_path(), ".env"), "LOG_FILE");
+
+    if (!rutalog) {
+        std::cerr << "[ERROR] No se pudo obtener la ruta del archivo de log desde el .env" << std::endl;
+        return;
+    }
+    std::ofstream archivo(*rutalog, std::ios::app);
     if (archivo.is_open()) {
         archivo << mensaje << "\n";
         archivo.close();
