@@ -3,10 +3,15 @@
 #include "../mainMenu/mainMenu.hpp"
 #include "../mates/mates.hpp"
 #include "../texto/texto.hpp"
-//#include <windows.h>
+#ifdef _WIN32
+#include <windows.h>
+#endif
 
 int main(int argc, char* argv[]) {
-    // SetConsoleOutputCP(CP_UTF8);
+    #ifdef _WIN32
+    SetConsoleOutputCP(CP_UTF8);
+    SetConsoleCP(CP_UTF8);
+#endif
     //Validar ejecución del sistema y recibir datos de usuario
     if (!validaInicio(argc, argv)) return 1;
     
