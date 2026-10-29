@@ -26,8 +26,10 @@ int main(int argc, char* argv[]) {
     // Obtener las variables de entorno necesarias
     valorEnvPerfil = getEnvVar(rutaEnv, "PERFIL_FILE");
     valorEnvUsuario = getEnvVar(rutaEnv, "USER_FILE");
+    valorEnvLog = getEnvVar(rutaEnv, "LOG_FILE");
+
     // Validar si se encontraron las variables de entorno
-    if (!valorEnvPerfil || !valorEnvUsuario) return 1;
+    if (!valorEnvPerfil || !valorEnvUsuario || !valorEnvLog) return 1;
 
     valorEnvMatrizA = getEnvVar(rutaEnv, "MATRIZ_A");
     if (!valorEnvMatrizA) valorEnvMatrizA = getEnvVar(rutaEnv, "RUTA_MATRIZ_A");
