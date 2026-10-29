@@ -1,4 +1,5 @@
 #include "ClassManager.hpp"
+#include "../Metodo/time.hpp"
 
 std::vector<std::string> ClassManager::getClasesDisponibles(Equipo bando) {
     if (bando == Equipo::AVENTURERO) {
@@ -23,32 +24,33 @@ bool ClassManager::asignarClase(Player& jugador, const std::string& nombre_clase
             // Orden: nombre, poder, tipo, cooldown_base Todos tienen cooldown +1 de lo que deberia porque es mas sencillo que mover codigo de sitio
             // La industria de los videojuegos siempre se ha tratado de atajos y hacer facil lo dificil
             jugador.agregarMovimiento("Espadazo", 40, TipoMovimiento::FISICO, 0);
-            jugador.agregarMovimiento("Corte Flamigero", 60, TipoMovimiento::MAGICO, 2);
-            jugador.agregarMovimiento("Estocada al Ojo",100,TipoMovimiento::FISICO,4);
+            jugador.agregarMovimiento("Corte Flamigero", 60, TipoMovimiento::MAGICO, 1);
+            jugador.agregarMovimiento("Estocada al Ojo",100,TipoMovimiento::FISICO,3);
             return true;
         }
         else if (nombre_clase=="Paladin"){
-            jugador.asignarClase("Paladin",300, 35, 15,50,30);
+            jugador.asignarClase("Paladin",300, 35, 25,50,30);
             jugador.agregarMovimiento("Placaje", 25,TipoMovimiento::FISICO,0);
             jugador.agregarMovimiento("Arremetida Propulsada", 50,TipoMovimiento::FISICO,1);
             jugador.agregarMovimiento("Luz Santa", 60,TipoMovimiento::MAGICO,2);
-            jugador.agregarMovimiento("Descenso Final",80,TipoMovimiento::FISICO,5);
+            jugador.agregarMovimiento("Descenso Final",80,TipoMovimiento::FISICO,3);
             return true;
         }
 
         else if (nombre_clase == "Mago") {
-            jugador.asignarClase("Mago", 220, 15, 45, 10, 50);
-            jugador.agregarMovimiento("Bola de Fuego", 55, TipoMovimiento::MAGICO, 0);
-            jugador.agregarMovimiento("Cuchillo Conjurado", 35,TipoMovimiento::FISICO,1);
-            jugador.agregarMovimiento("Luz Sanadora", 80, TipoMovimiento::CURACION, 5);
+            jugador.asignarClase("Mago", 220, 20, 45, 10, 50);
+            jugador.agregarMovimiento("Bola de Fuego", 35, TipoMovimiento::MAGICO, 0);
+            jugador.agregarMovimiento("Cuchillo Conjurado", 40,TipoMovimiento::FISICO,1);
+            jugador.agregarMovimiento("Explosión", 100,TipoMovimiento::MAGICO,4);
+            jugador.agregarMovimiento("Luz Sanadora", 80, TipoMovimiento::CURACION, 3);
             return true;
         }
         else if (nombre_clase == "Asesino"){
-            jugador.asignarClase("Asesino",200,45,30,15,15);
+            jugador.asignarClase("Asesino",200,45,40,15,15);
             jugador.agregarMovimiento("Tajo Diagonal", 35,TipoMovimiento::FISICO,0);
-            jugador.agregarMovimiento("Filo Electrico", 60,TipoMovimiento::MAGICO,2);
-            jugador.agregarMovimiento("Danza Incesante", 60,TipoMovimiento::FISICO,2);
-            jugador.agregarMovimiento("Analgesico", 40,TipoMovimiento::CURACION,4);
+            jugador.agregarMovimiento("Filo Electrico", 60,TipoMovimiento::MAGICO,1);
+            jugador.agregarMovimiento("Danza Incesante", 60,TipoMovimiento::FISICO,1);
+            jugador.agregarMovimiento("Analgesico", 40,TipoMovimiento::CURACION,2);
             return true;
         }
     }
@@ -74,11 +76,11 @@ bool ClassManager::asignarClase(Player& jugador, const std::string& nombre_clase
             return true;
         }
         else if (nombre_clase == "Lobo Eclipse") {
-            jugador.asignarClase("Lobo Eclipse", 1500, 35, 35, 50, 10);
+            jugador.asignarClase("Lobo Eclipse", 1500, 40, 40, 50, 10);
             jugador.agregarMovimiento("Embestida", 40, TipoMovimiento::FISICO, 0);
             jugador.agregarMovimiento("Trampa de Sombras",50 , TipoMovimiento::MAGICO, 1);
-            jugador.agregarMovimiento("Mordisco Sorpresa",60,TipoMovimiento::FISICO, 3);
-            jugador.agregarMovimiento("Luz de Luna", 400, TipoMovimiento::CURACION, 5);
+            jugador.agregarMovimiento("Mordisco Sorpresa",60,TipoMovimiento::FISICO, 2);
+            jugador.agregarMovimiento("Luz de Luna", 400, TipoMovimiento::CURACION, 4);
             return true;
         }
     }

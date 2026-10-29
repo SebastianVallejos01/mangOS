@@ -1,11 +1,12 @@
 #include "GameState.hpp"
 #include <cmath>
+#include "../Metodo/time.hpp"
 #include <algorithm>
-
-
 #include <iostream> // esta aca pa mandar mensajes al server
 
-
+// AÑADIDO: Declaramos que esta función existe en otro archivo (server.cpp)
+// Así evitamos el error de "múltiples definiciones" al compilar.
+extern void guardarLog(const std::string& mensaje);
 
 GameState::GameState() {
     turno_actual_index = 0;
@@ -71,8 +72,12 @@ std::string GameState::ejecutarMovimiento(Player& atacante, Player& objetivo, in
         return "'" + mov.nombre + " aún está recargándose, no puedo usarlo.";
     }
 
-    // Ponemos el movimiento en enfriamiento
-    mov.cooldown_actual = mov.cooldown_base;
+    // CORRECCIÓN APLICADA: Ponemos el movimiento en enfriamiento (con el +1 para cuadrar turnos)
+    if (mov.cooldown_base > 0) {
+        mov.cooldown_actual = mov.cooldown_base + 1;
+    } else {
+        mov.cooldown_actual = 0;
+    }
 
     std::string resumen = atacante.getNombre() + " usó " + mov.nombre + " (Dado: " + std::to_string(valor_dado) + "). ";
 
@@ -83,6 +88,18 @@ std::string GameState::ejecutarMovimiento(Player& atacante, Player& objetivo, in
         int curacion = calcularEfectividad(mov.poder, valor_dado);
         objetivo.curar(curacion);
         resumen += objetivo.getNombre() + " recuperó " + std::to_string(curacion) + " puntos de su HP maxima.";
+        
+        std::cout<<getTimestamp()<<"; "<<atacante.getNombre() <<"; "
+                    << (atacante.getEquipo() == Equipo::COLOSO ? "COLOSO" : "AVENTURERO") 
+                    << "; Curó "<<std::to_string(curacion) <<" a "<<objetivo.getNombre() <<"; "
+                    << (objetivo.getEquipo() == Equipo::COLOSO ? "COLOSO" : "AVENTURERO") 
+                    << std::endl;
+                    
+        guardarLog(getTimestamp() + "; " + atacante.getNombre() + "; " +
+                   (atacante.getEquipo() == Equipo::COLOSO ? "COLOSO" : "AVENTURERO") + 
+                   "; Curó " + std::to_string(curacion) + " a " + objetivo.getNombre() + "; " +
+                   (objetivo.getEquipo() == Equipo::COLOSO ? "COLOSO" : "AVENTURERO"));
+                   
         return resumen;
     }
 
@@ -109,7 +126,18 @@ std::string GameState::ejecutarMovimiento(Player& atacante, Player& objetivo, in
     
     objetivo.recibirDano(dano_final);
     resumen += "Causó " + std::to_string(dano_final) + " de daño a " + objetivo.getNombre() +" (" + objetivo.getClase()+").";
-    std::cerr << atacante.getNombre() + " causó " + std::to_string(dano_final) + "de daño a "+ objetivo.getNombre() +" (" + objetivo.getClase()+")." << std::endl;
+    std::cerr << atacante.getNombre() + " causó " + std::to_string(dano_final) + " de daño a "+ objetivo.getNombre() +" (" + objetivo.getClase()+")." << std::endl;
+
+    std::cout<<getTimestamp()<<"; "<<atacante.getNombre() <<"; "
+    << (atacante.getEquipo() == Equipo::COLOSO ? "COLOSO" : "AVENTURERO") 
+    << "; Dañó "<<std::to_string(dano_final) <<" a "<<objetivo.getNombre() <<"; "
+    << (objetivo.getEquipo() == Equipo::COLOSO ? "COLOSO" : "AVENTURERO") 
+    << std::endl;
+    
+    guardarLog(getTimestamp() + "; " + atacante.getNombre() + "; " +
+               (atacante.getEquipo() == Equipo::COLOSO ? "COLOSO" : "AVENTURERO") + 
+               "; Dañó " + std::to_string(dano_final) + " a " + objetivo.getNombre() + "; " +
+               (objetivo.getEquipo() == Equipo::COLOSO ? "COLOSO" : "AVENTURERO"));
 
     return resumen;
 }
@@ -125,8 +153,16 @@ Equipo GameState::verificarGanador() const {
         }
     }
 
-    if (!coloso_vivo) return Equipo::AVENTURERO; 
-    if (!aventurero_vivo) return Equipo::COLOSO; 
+    if (!coloso_vivo) {
+        std::cout<<getTimestamp()<<"; Ganan los AVENTUREROS"<< std::endl;
+        guardarLog(getTimestamp() + "; Ganan los AVENTUREROS");
+        return Equipo::AVENTURERO; 
+    }
+    if (!aventurero_vivo){
+        std::cout<<getTimestamp()<<"; Gana el Coloso"<< std::endl; 
+        guardarLog(getTimestamp() + "; Gana el Coloso");
+        return Equipo::COLOSO;
+    } 
 
     return Equipo::NINGUNO; 
 }
@@ -134,4 +170,3 @@ Equipo GameState::verificarGanador() const {
 Player& GameState::getJugador(int index) {
     return jugadores[index];
 }
-

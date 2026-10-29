@@ -1,16 +1,29 @@
 #include "server.hpp"
 #include "../Classes/ClassManager.hpp"
+#include "../Metodo/time.hpp"
 #include <iostream>
+#include <fstream> // AÑADIDO: Necesario para leer y escribir archivos
 #include <cstring>
 #include <unistd.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <cstdlib> 
-#include <ctime>
 #include <csignal> 
 
-
-
+// ==========================================
+// FUNCIÓN AUXILIAR PARA GUARDAR LOGS
+// ==========================================
+void guardarLog(const std::string& mensaje) {
+    // std::ios::app permite añadir texto sin borrar lo anterior.
+    // La carpeta debe existir previamente, como mencionaste.
+    std::ofstream archivo("BD/GAME/LOGS/LOG.TXT", std::ios::app);
+    if (archivo.is_open()) {
+        archivo << mensaje << "\n";
+        archivo.close();
+    } else {
+        std::cerr << "[ERROR] No se pudo escribir en el archivo LOG.TXT" << std::endl;
+    }
+}
 
 // ==========================================
 // CONSTRUCTOR Y DESTRUCTOR
@@ -93,8 +106,6 @@ std::string Server::recibirMensajeConControl(int socket_actual) {
 // CONFIGURACIÓN E INICIO
 // ==========================================
 
-
-
 bool Server::iniciar() {
     // IGNORAR SIGPIPE: Evita que el servidor se cierre si envía datos a un socket desconectado
     signal(SIGPIPE, SIG_IGN);
@@ -125,12 +136,10 @@ bool Server::iniciar() {
         std::cerr << "Error: Fallo al intentar escuchar en el puerto." << std::endl;
         return false;
     }
-
+    
     std::cout << "Servidor de Asedio al Coloso iniciado en el puerto " << puerto << "." << std::endl;
     return true;
 }
-
-
 
 std::string Server::recibirMensaje(int cliente_socket) {
     if (cliente_socket <= 0) return "ERROR_DESCONEXION";
@@ -147,7 +156,6 @@ std::string Server::recibirMensaje(int cliente_socket) {
     return mensaje;
 }
 
-
 // ==========================================
 // FASES DEL JUEGO
 // ==========================================
@@ -156,16 +164,17 @@ void Server::esperarJugadores() {
     int addrlen = sizeof(direccion_cliente);
     fd_set readfds; // Conjunto de sockets a vigilar
 
-    std::cout << "ESPERANDO A QUE 4 DIVINOS SE CONECTEN..." << std::endl;
+    std::cout << getTimestamp()+" ESPERANDO A QUE 4 JUGADORES SE CONECTEN..." << std::endl;
+    guardarLog(getTimestamp() + " ESPERANDO A QUE 4 JUGADORES SE CONECTEN...");
 
     while (sockets_clientes.size() < 4) {
-        // 1. Limpiamos y preparamos la lista de vigilancia
+        // 1. Limpiamos y preparamos la lista
         FD_ZERO(&readfds);
-        FD_SET(server_fd, &readfds); // Vigilamos la puerta principal (nuevas conexiones)
+        FD_SET(server_fd, &readfds); // Vigilamos las nuevas conexiones
         
         int max_sd = server_fd;
 
-        // Añadimos a los clientes que ya están en la sala a la lista de vigilancia
+        // Añadimos a los clientes que ya están en la sala a la lista
         for (int sd : sockets_clientes) {
             FD_SET(sd, &readfds);
             if (sd > max_sd) max_sd = sd;
@@ -184,7 +193,10 @@ void Server::esperarJugadores() {
             int nuevo_socket = accept(server_fd, (struct sockaddr *)&direccion_cliente, (socklen_t*)&addrlen);
             if (nuevo_socket >= 0) {
                 sockets_clientes.push_back(nuevo_socket);
-                std::cout << "DIVINO CONECTADO. Sala: " << sockets_clientes.size() << "/4." << std::endl;
+                
+                std::cout<<getTimestamp()+"; Jugador Nuevo; Conectado; " << sockets_clientes.size()<< "/4." << std::endl;
+                guardarLog(getTimestamp() + "; Jugador Nuevo; Conectado; " + std::to_string(sockets_clientes.size()) + "/4.");
+                
                 enviarMensaje(nuevo_socket, "CONECTADO|ESPERANDO A LOS DEMAS DIVINOS...");
             }
         }
@@ -202,6 +214,10 @@ void Server::esperarJugadores() {
                     std::cout << "UN DIVINO HA DESAPERECIDO... QUE CRUEL...";
                     close(sd);
                     it = sockets_clientes.erase(it); // Lo sacamos de la lista
+                    
+                    std::cout<<getTimestamp()+"; Jugador Desconectado;Desconexión"<<sockets_clientes.size()<<"/4."<< std::endl;
+                    guardarLog(getTimestamp() + "; Jugador Desconectado;Desconexión" + std::to_string(sockets_clientes.size()) + "/4.");
+                    
                     std::cout << "Sala: " << sockets_clientes.size() << "/4." << std::endl;
                 } else {
                     ++it;
@@ -220,7 +236,6 @@ void Server::esperarJugadores() {
 bool Server::faseSeleccionEquipo() {
     std::cout << "\n--- INICIANDO FASE 1: ¿QUIENES BUSCAIS SER?---" << std::endl;
     enviarATodos("EN ESTE MUNDO, ¿QUIENES BUSCAIS SER?");
-
 
     // Estructura interna para llevar el estado individual de cada conexión
     enum Paso { ESPERANDO_NOMBRE, ESPERANDO_EQUIPO, LISTO };
@@ -265,6 +280,10 @@ bool Server::faseSeleccionEquipo() {
                 // Manejo de desconexión
                 if (msg == "ERROR_DESCONEXION") {
                     std::cout << "Jugador desconectado durante Fase 1. Abortando..." << std::endl;
+                    
+                    std::cout<<getTimestamp()+"; Jugador Desconectado;Desconexión"<<sockets_clientes.size()<<"/4."<< std::endl;
+                    guardarLog(getTimestamp() + "; Jugador Desconectado;Desconexión" + std::to_string(sockets_clientes.size()) + "/4.");
+                    
                     close(sock);
                     sockets_clientes.erase(sockets_clientes.begin() + i);
                     enviarATodos("SISTEMA|UN DIVINO NOS HA ABANDONADO. HEMOS DE VOLVER A PARA ESPERAR POR OTRO...");
@@ -276,8 +295,11 @@ bool Server::faseSeleccionEquipo() {
                 if (estados[i].paso == ESPERANDO_NOMBRE) {
                     estados[i].nombre = msg;
                     estados[i].paso = ESPERANDO_EQUIPO;
-                    std::cout << "Jugador en socket " << sock << " registrado como: " << msg << std::endl;
-
+                    std::cout << "Jugador en socket " << sock << "; Registrado como: " << msg << std::endl;
+                    
+                    std::cout<<getTimestamp()+"; Jugador Sock: "<<sock<<";Nombramiento; "<<" Ahora se llama "<<msg<< std::endl;
+                    guardarLog(getTimestamp() + "; Jugador Sock: " + std::to_string(sock) + ";Nombramiento;  Ahora se llama " + msg);
+                    
                     // Le enviamos su menú de bando con cupos actuales
                     std::string menu = "MUY BIEN " + msg + ", ELIGE TU DESTINO:\n";
                     if (aventureros_elegidos < 3) menu += "1. Aventurero (" + std::to_string(3 - aventureros_elegidos) + " cupos)\n";
@@ -292,6 +314,9 @@ bool Server::faseSeleccionEquipo() {
                         estados[i].paso = LISTO;
                         jug_listos++;
                         enviarMensaje(sock, "CONFIRMADO|HAS DECIDIDO SER UN AVENTURERO. TU ESPIRITU DE CONQUISTA HABLA POR TI...");
+                        
+                        std::cout<<getTimestamp()+"; "+msg+"; Union Equipo; Se une a Aventureros"<< std::endl;
+                        guardarLog(getTimestamp() + "; " + msg + "; Union Equipo; Se une a Aventureros");
                     } 
                     else if (msg == "2" && colosos_elegidos < 1) {
                         estados[i].equipo = Equipo::COLOSO;
@@ -299,7 +324,10 @@ bool Server::faseSeleccionEquipo() {
                         estados[i].paso = LISTO;
                         jug_listos++;
                         enviarMensaje(sock, "CONFIRMADO|POR FAVOR, PROTEGE ESTE MUNDO, COLOSO...");
-                    } 
+                        
+                        std::cout<<getTimestamp()+"; "+msg+"; Union Equipo; Se une a Colosos"<< std::endl;
+                        guardarLog(getTimestamp() + "; " + msg + "; Union Equipo; Se une a Colosos");
+                    }
                     else {
                         // Si un jugador elige Coloso o aventurero cuando ya no hay cupos salta este mensaje 
                         std::string menu = "ERROR|ESTE MUNDO NO PUEDE CONCEBIR MAS SERES COMO ESTOS, POR FAVOR ENTIENDALO:\n";
@@ -310,8 +338,6 @@ bool Server::faseSeleccionEquipo() {
                 }
             }
         }
-
-        
     }
 
     // 3. REORDENAMIENTO AUTOMÁTICO: Alinear sockets y jugadores (0,1,2 = Aventureros | 3 = Coloso)
@@ -353,7 +379,6 @@ bool Server::faseSeleccionEquipo() {
 
 
 // FASE 2: NUESTROS QUERIDOS DIVINOS SE ENCUENTRAN EN EL DILEMA DE A QUIEN ENCARNAR EN ESTE MUNDO
-
 bool Server::faseSeleccionClase() {
     std::cout << "\n--- INICIANDO FASE 2: SELECCION DE CLASE (SIMULTANEO) ---" << std::endl;
 
@@ -400,6 +425,10 @@ bool Server::faseSeleccionClase() {
                     close(sock);
                     sockets_clientes.erase(sockets_clientes.begin() + i);
                     enviarATodos("SISTEMA|UN DIVINO NOS HA ABANDONADO. HEMOS DE VOLVERA PARA ESPERAR POR OTRO...");
+                    
+                    std::cout<<getTimestamp()+"; Jugador Desconectado;Desconexión"<<sockets_clientes.size()<<"/4."<< std::endl;
+                    guardarLog(getTimestamp() + "; Jugador Desconectado;Desconexión" + std::to_string(sockets_clientes.size()) + "/4.");
+                    
                     estado_juego = GameState();
                     return false;
                 }
@@ -416,6 +445,13 @@ bool Server::faseSeleccionClase() {
                             jug_listos++;
                             enviarMensaje(sock, "CONFIRMADO|FINALMENTE OPTASTE POR UNA NUEVA FORMA, UN " + clase_elegida + "..., YA VEO...\n ALGUNOS DIVINOS AUN NO SE DECIDEN...");
                             std::cout << jugador.getNombre() << " eligio " << clase_elegida << std::endl;
+                            
+                            std::cout<<getTimestamp()+"; "<<jugador.getNombre()<<"; "
+                            << (jugador.getEquipo() == Equipo::COLOSO ? "COLOSO" : "AVENTURERO") 
+                            <<"; Eligió"+clase_elegida << std::endl;
+                            
+                            guardarLog(getTimestamp() + "; " + jugador.getNombre() + "; " + 
+                                      (jugador.getEquipo() == Equipo::COLOSO ? "COLOSO" : "AVENTURERO") + "; Eligió " + clase_elegida);
                         }
                     } else {
                         enviarMensaje(sock, "ERROR|Numero fuera de rango. Intenta de nuevo:");
@@ -431,18 +467,18 @@ bool Server::faseSeleccionClase() {
     enviarATodos("YA TODOS HABEIS ELEGIDO VUESTRO DESTINO...");
     enviarATodos("¡QUE LA SUERTE ACOMPAÑE A LOS MAS FUERTES!");
     
-    
     estado_juego.iniciarJuego();
     return true;
 }
 
 // Loop de la fase 3
-
 void Server::loopCombate() {
     std::cout << "\n--- INICIANDO FASE 3: COMBATE ---" << std::endl;
     srand(time(nullptr));
 
     bool juego_terminado = false;
+    std::cout<<getTimestamp()+"; "<<"Inicio de partida" << std::endl;
+    guardarLog(getTimestamp() + "; Inicio de partida");
 
     while (!juego_terminado) {
         int turno_index = estado_juego.getTurnoActualIndex();
@@ -457,6 +493,13 @@ void Server::loopCombate() {
 
         enviarATodos("\n==================================");
         enviarATodos("ES EL TURNO DE:: " + atacante.getNombre() + " (" + atacante.getClase() + ")");
+        
+        std::cout<<getTimestamp()<<"; "<<atacante.getNombre() <<"; "
+        << (atacante.getEquipo() == Equipo::COLOSO ? "COLOSO" : "AVENTURERO") << std::endl;
+        
+        guardarLog(getTimestamp() + "; " + atacante.getNombre() + "; " + 
+                  (atacante.getEquipo() == Equipo::COLOSO ? "COLOSO" : "AVENTURERO"));
+        
         enviarATodos("HP: " + std::to_string(atacante.getHp()) + "/" + std::to_string(atacante.getHpMax()));
         
         bool accion_valida = false;
@@ -534,6 +577,9 @@ void Server::loopCombate() {
 
                     if (resp_obj == "ERROR_DESCONEXION") {
                         atacante.recibirDano(99999);
+                        std::cout<<getTimestamp()<<"; "<< atacante.getNombre() << "; Se desconectó"<<std::endl;
+                        guardarLog(getTimestamp() + "; " + atacante.getNombre() + "; Se desconectó");
+                        
                         enviarATodos("SISTEMA| A " + atacante.getNombre() + " LE DIO UN PARO CARDIACO, QUE LAMENTABLE...");
                         close(socket_actual);
                         sockets_clientes[turno_index] = -1;
@@ -577,6 +623,9 @@ void Server::loopCombate() {
 
                     if (resp_obj == "ERROR_DESCONEXION") {
                         atacante.recibirDano(99999);
+                        std::cout<<getTimestamp()<<"; "<< atacante.getNombre() << "; Se desconectó"<<std::endl;
+                        guardarLog(getTimestamp() + "; " + atacante.getNombre() + "; Se desconectó");
+                        
                         enviarATodos("SISTEMA| A " + atacante.getNombre() + " LE DIO UN PARO CARDIACO, QUE LAMENTABLE...");
                         close(socket_actual);
                         sockets_clientes[turno_index] = -1;
@@ -630,6 +679,18 @@ void Server::loopCombate() {
                                        "\n ¡LOS AVENTUREROS HAN DERROTADO AL COLOSO, EL MUNDO AHORA ES SUYO!" : 
                                        "\n ¡EL COLOSO HA APLASTADO A LOS AVENTUREROS, EL MUNDO VUELVE A ESTAR EN PAZ! POR AHORA...";
             enviarATodos(msj_victoria);
+            
+            std::cout << getTimestamp() << "; Partida Finalizada" << std::endl;
+            guardarLog(getTimestamp() + "; Partida Finalizada");
+            
+            // --- AÑADE ESTO PARA CERRAR LA CONEXIÓN Y LIBERAR A LOS CLIENTES ---
+            for (int socket_cliente : sockets_clientes) {
+                if (socket_cliente > 0) {
+                    close(socket_cliente);
+                }
+            }
+            // -----------------------------------------------------------------
+
             std::cout << "Partida finalizada con exito." << std::endl;
         } else {
             estado_juego.avanzarTurno();
