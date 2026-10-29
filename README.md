@@ -27,6 +27,14 @@ Actualmente, el sistema implementa un menú principal protegido por credenciales
 - **Persistencia de Datos:** Toda la información de usuarios, perfiles y matrices se guarda localmente en archivos de texto, por lo que el sistema recuerda los datos entre ejecuciones.
 - **Configuración por Entorno:**
   Para garantizar la flexibilidad, escalabilidad y seguridad en la gestión de rutas físicas, las rutas de los archivos de texto se configuran de manera segura usando variables de entorno en un archivo `.env`. Durante el arranque, el sistema busca dinámicamente este archivo escalando por los directorios desde la ruta de ejecución actual. Para el correcto funcionamiento del módulo, se deben declarar dentro de este archivo `.env` obligatoriamente dos variables de entorno: USER_FILE y PERFIL_FILE. Estas variables le indican al programa las rutas relativas exactas donde se ubican los archivos de texto que actúan como bases de datos para persistir la información de los usuarios y perfiles.
+- **Procesamiento Concurrente (Índice Invertido):** Generación paralela de un índice invertido de frecuencia de palabras sobre archivos de texto mediante un esquema Productor-Consumidor (cola de trabajo, threads trabajadores y sincronización con semáforos POSIX y mutex).
+
+##### Procesamiento Paralelo del Índice Invertido
+La arquitectura de indexación sigue un flujo desacoplado para optimizar el uso de CPU:
+1. **Cola:** El hilo principal escanea la carpeta de libros, asigna un ID numérico a cada archivo `.txt` y los deposita en una cola compartida (`colaTrabajo`).
+2. **Threads:** Se despliegan concurrentemente `N_THREADS` trabajadores encargados de consumir libros de la cola.
+3. **Semáforos y Mutex:** Un semáforo POSIX contador (`sem_t`) coordina la disponibilidad de elementos en la cola, mientras que exclusiones mutuas (`std::mutex`) protegen la extracción segura y la escritura acumulada en memoria.
+4. **Resultados e Índice Invertido:** Cada hilo genera un mapa local de frecuencias y lo fusiona en `indiceGlobal`. Tras finalizar todos los threads (`join`), el resultado se serializa en el archivo configurado con el formato `palabra;(idLibro,frecuencia)`
 
 ## Declaración de uso de IA generativa
 
@@ -53,6 +61,10 @@ PERFIL_FILE=./BD/UM/PERFILES.TXT
 MATRIZ_A=./BD/Matrices/M1.TXT
 MATRIZ_B=./BD/Matrices/N1.TXT
 SEPARADOR_MATRICES=#
+LIBROS=./BD/Libros
+ID_LIBROS=./BD/Index/id_libros.txt
+INDEX_LIBROS=./BD/Index/indice_invertido.idx
+N_THREADS=4
 ```
 
 Se presenta tabla que describe a detalle las variables de entorno.
@@ -65,6 +77,10 @@ Se presenta tabla que describe a detalle las variables de entorno.
 | `MATRIZ_A`           | `./BD/Matrices/M1.TXT` | Ruta de la primera matriz     | Archivo de matriz con delimitador       |
 | `MATRIZ_B`           | `./BD/Matrices/N1.TXT` | Ruta de la segunda matriz     | Archivo de matriz con delimitador       |
 | `SEPARADOR_MATRICES` | `#`                    | Delimitador usado en matrices | Carácter delimitador (ej.`#`)          |
+| `LIBROS`             | `./BD/Libros`                    | Directorio con los libros a procesar | Directorio con archivos `.txt`  |
+| `ID_LIBROS`          | `./BD/Index/id_libros.txt`       | Mapeo identificador - nombre         | `id;nombre_archivo`             |
+| `INDEX_LIBROS`       | `./BD/Index/indice_invertido.idx`| Salida del índice invertido          | `palabra;(id,frecuencia);`      |
+| `N_THREADS`          | `4`                              | Cantidad de hilos trabajadores       | Número entero mayor a 0         |
 
 ### 3. Compilación
 
@@ -104,38 +120,45 @@ Las instrucciones básicas de operación se encuentran en `Manual_Usuario.md` ju
 mangOS
     │   .env                  # Archivo de configuración con variables de entorno
     │   Makefile              # Archivo para automatizar la compilación
+    │   Manual_Usuario.md     # Especificaciones funcionales e instrucciones de uso.
+    │   Manual_Usuario.pdf    # Manual de usuario en formato pdf.
     │   README.md             # Documentación principal del proyecto
-    |   Manual_Usuario.md     # Especificaciones funcionales e instrucciones de uso.
-    |   Manual_Usuario.pdf    # Manual de usuario en formato pdf.
     │
     ├───BD                    # Carpeta base para el almacenamiento de datos
-    │   ├───UM                # Datos del módulo User Manager
-    │   │       PERFILES.TXT  # Archivo plano que almacena los perfiles y permisos
-    │   │       USUARIOS.TXT  # Archivo plano que almacena las credenciales
+    │   ├───Index             # Archivos generados por el módulo de indexación
+    │   │   ├──id_libros.txt     # Mapeo de identificadores y nombres de libros
+    │   │   └──indice_invertido.idx # Índice invertido final serializado
+    │   ├───Libros            # ~50 MB de libros de libre acceso de gutenberg.org y memoriachilena.gob.cl, en formato TXT
     │   ├───Matrices          # Matrices almacenadas en formato texto (.TXT)
-    │   └───Libros            # ~50 MB de libros de libre acceso de gutenberg.org y memoriachilena.gob.cl, en formato TXT
+    │   └───UM                # Datos del módulo User Manager
+    │       ├───PERFILES.TXT  # Archivo plano que almacena los perfiles y permisos
+    │       └───USUARIOS.TXT # Archivo plano que almacena las credenciales
     │
     └───SRC                   # Código fuente de la aplicación
-        ├───SistOpe           # Núcleo principal del Sistema Operativo
-        │       SistOpe.cpp   # Archivo principal (Main), enlaza los menús
+        ├───index             # Módulo de procesamiento concurrente e índice
+        │   index.cpp         # Lógica de threads, sincronización y parseo
+        │   index.hpp         # Cabecera, estructuras y primitivas de concurrencia
         │
         ├───login             # Módulo de autenticación
-        │       login.cpp      # Lógica de login
-        │       login.hpp      # Cabecera del módulo de login
+        │   login.cpp          # Lógica de login
+        │   login.hpp          # Cabecera del módulo de login
         │
         ├───mainMenu          # Menú principal del sistema
-        │       mainMenu.cpp   # Lógica del menú principal
-        │       mainMenu.hpp   # Cabecera del módulo del menú principal
+        │   mainMenu.cpp       # Lógica del menú principal
+        │   mainMenu.hpp       # Cabecera del módulo del menú principal
         │
         ├───mates             # Módulo matemático / cálculo
-        │       mates.cpp      # Lógica del módulo mates
-        │       mates.hpp      # Cabecera del módulo mates
+        │   mates.cpp          # Lógica del módulo mates
+        │   mates.hpp          # Cabecera del módulo mates
+        │
+        ├───SistOpe           # Núcleo principal del Sistema Operativo
+        │   SistOpe.cpp        # Archivo principal (Main), enlaza los menús
         │
         ├───texto             # Módulo de texto
-        │       texto.cpp      # Lógica del módulo texto
-        │       texto.hpp      # Cabecera del módulo texto
+        │   texto.cpp          # Lógica del módulo texto
+        │   texto.hpp          # Cabecera del módulo texto
         │
         └───userManager       # Módulo de gestión de identidades y accesos
-                userManager.cpp # Lógica interactiva de usuarios y perfiles
-                userManager.hpp # Cabecera con declaración de estructuras (User, Profile)
+            userManager.cpp   # Lógica interactiva de usuarios y perfiles
+            userManager.hpp   # Cabecera con declaración de estructuras (User, Profile)
 ```
