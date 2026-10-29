@@ -5,6 +5,7 @@
 * **Sincronización Híbrida:** Cada método de modificación actúa primero sobre la memoria temporal RAM (modificando las estructuras UserList y ProfileList). Tras la confirmación del operador, el sistema invoca una reescritura directa en el disco utilizando std::ofstream con el modo std::ios::trunc para sobreescribir los archivos con la versión actualizada.
 * **Eficiencia de Procesos:** Los archivos físicos se leen y cargan en memoria exclusivamente durante el arranque del programa en el archivo principal. Posteriormente, todas las funciones de listado y modificación interactúan directamente con los vectores en memoria, optimizando drásticamente los tiempos de respuesta.
 * **Procesamiento Concurrente y Paralelismo:** El método `crearIndiceInvertido` opera como orquestador del patrón Productor-Consumidor. Inicializa un semáforo contador POSIX (`sem_t`) con la carga total de libros y despliega `N_THREADS` trabajadores en paralelo. La extracción de tareas (`colaTrabajo`) y la consolidación de resultados en memoria RAM se sincronizan mediante bloqueos `std::mutex`, eliminando condiciones de carrera antes de la persistencia final.
+* **Comunicación entre Procesos por Sockets:** El juego multiplayer desacopla la lógica en dos binarios independientes. El servidor centraliza el estado compartido y la autorización de turnos, mientras que los clientes actúan como interfaces de entrada/salida que reciben y envían mensajes de red en tiempo real.
 
 **2\. Manejo y Arquitectura de Datos**
 --------------------------------------
@@ -20,7 +21,9 @@
 * **Filtro de Entradas por Omisión:** El sistema maneja las entradas inesperadas en los menús de forma pasiva y resiliente. Si el usuario ingresa un dato no reconocido, el menú simplemente no reacciona a la entrada inválida y vuelve a iterar el ciclo do-while, repitiendo la consulta sin colapsar ni requerir bloques complejos de manejo de excepciones.
 * **Protección Estricta de Roles Base:** El método borraPerfil implementa un bloqueo de seguridad directo mediante una validación condicional (if (nombre == "ADMIN" || nombre == "GENERAL")). Esto deniega instantáneamente cualquier intento de eliminar las cuentas con mayores privilegios en el sistema.
 * **Limpieza de Cadenas (Sanitización):** Para prevenir corrupción por manipulación manual de los archivos .txt, el sistema utiliza la función limpiarString, la cual remueve activamente marcas de orden de bytes (BOM) de archivos UTF-8 y recorta espacios en blanco residuales al inicio y final de las cadenas.
-*   **Validación de Entorno Multihilo:** Previo al procesamiento, la función `cargarConfiguracionIndex` comprueba que la ruta de libros exista físicamente y corresponda a un directorio válido, que contenga archivos `.txt` y que `N_THREADS` sea un valor numérico entero mayor a cero. Si alguna condición falla, el sistema notifica el error por consola y retorna de forma segura al menú principal sin interrumpir la ejecución.
+* **Validación de Entorno Multihilo:** Previo al procesamiento, la función `cargarConfiguracionIndex` comprueba que la ruta de libros exista físicamente y corresponda a un directorio válido, que contenga archivos `.txt` y que `N_THREADS` sea un valor numérico entero mayor a cero. Si alguna condición falla, el sistema notifica el error por consola y retorna de forma segura al menú principal sin interrumpir la ejecución.
+* **Tolerancia a Desconexiones en Red y Auditoría:** La caída o salida inesperada de un cliente es detectada por el servidor, el cual libera los recursos asociados y continúa la partida con el resto de los participantes sin colapsar. Cada evento (conexión, turno, desconexión y término) queda registrado con marca de tiempo en el archivo definido por la variable de entorno de log.
+
 
 **4\. Instrucciones Rápidas de Uso**
 -------------------------------------
@@ -70,7 +73,64 @@ El programa procesará esta operación invocando dinámicamente un ejecutable ex
 
 **3. Juego**
 
-En construcción. Funcionalidad futura.
+
+EL juego inicia una vez se llenan los 4 jugadores, la primera fase consiste en seleccionar tu equipo y tu clase. el juego es asimetrico por lo que es de 3 vs 1.
+Una vez seleccionado todo se procede al combate por turnos, cada jugador tiene un turno en el que tratará de derrotar a los miembros del equipo oponente.
+una vez se llegue a 0 la vida de todos los miembros de un equipo, el equipo que todavia tenga miembros vivos gana.
+
+Cada clase posee diferentes caracteristicas:
+
+    #Clase/Coloso: HP   ATK ATK.SP DEF DEF.SP
+	#"movimiento", Poder, Tipo, Cooldown
+
+___AVENTUREROS___ 
+Guerrero:	250	30	20	25	25
+		"Espadazo", 40, FISICO, Cooldown:0
+		"Corte Flamigero", 60, MAGICO, Cooldown:1
+		"Estocada al Ojo",100,FISICO,Cooldown:3
+	
+Paladin:	300	30	10	50	30
+	"Placaje", 25,FISICO,Cooldown:0
+	"Arremetida Propulsada", 50,FISICO,Cooldown:1
+	"Luz Santa", 60,MAGICO,2
+	"Descenso Final",80,FISICO,Cooldown:3
+	
+Mago:		220	15	45	20	50
+	"Bola de Fuego", 35, MAGICO, Cooldown:0
+	"Cuchillo Conjurado", 40,FISICO,Cooldown:1
+	"Explosión", 100,MAGICO,Cooldown:4
+	"Luz Sanadora", 80, CURACION, Cooldown:3
+	
+Asesino: 	200	45	30	20	20
+	"Tajo Diagonal", 35,FISICO,Cooldown:0
+	"Filo Electrico", 60,MAGICO,Cooldown:1
+	"Danza Incesante", 60,FISICO,Cooldown:1
+	"Analgesico", 40,CURACION,Cooldown:2
+
+___COLOSOS___
+DragonDorado:	1000	20	40	10	50
+	"Zarpa Gigante", 55, FISICO, Cooldown:2
+	"Rafaga de viento", 35, MAGICO, Cooldown:1)
+	"Escombros Gigantes", 60,FISICO,Cooldown:3
+	"Flama Dorada", 70, MAGICO, Cooldown:5
+
+SamuraiEterno:	800	50	30	20	20
+	"Corte Instantaneo", 55, FISICO, Cooldown:3
+	"Corte de Viento", 50, MAGICO,Cooldown: 3
+	"Ogro Celestial", 60,MAGICO,Cooldown:4
+	"Dragon Piroclastico", 70, MAGICO, Cooldown:5
+	"Cielo Azul", 95, FISICO,Cooldown: 6
+	
+LoboEclipse:	1300	30	30	50	10
+	"Embestida", 40, FISICO, Cooldown:0
+	"Trampa de Sombras",50 , MAGICO,Cooldown: 1
+	"Mordisco Sorpresa",60,FISICO,Cooldown: 2
+	"Luz de Luna", 400, CURACION, Cooldown:4
+
+
+Excepcion de Desconexion:
+Si un jugador se desconecta, la vida de dicho jugador es reducida a 0, y dependiendo del estado del juego despues de esto, este puede darse por finalizado.
+
 
 **4. ¿Es palíndromo?**
 
