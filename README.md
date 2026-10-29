@@ -16,7 +16,7 @@ El proyecto tiene como propósito principal simular el núcleo de un Sistema Ope
 
 Actualmente, el sistema implementa un menú principal protegido por credenciales y un completo módulo de gestión de identidades:
 
-- **Autenticación por Consola:** Ingreso seguro al sistema requiriendo usuario, contraseña y un archivo de configuración mediante argumentos de ejecución.
+- **Autenticación por Consola:** Ingreso seguro al sistema requiriendo usuario, contraseña y un archivo de lectura, mediante argumentos de ejecución.
 - **Menú Principal y Multiprocesamiento:** Ejecución de funcionalidades avanzadas (como la multiplicación de matrices NxM) delegando el trabajo a procesos externos (programas hijos) invocados mediante el sistema.
 - **Gestión de Usuarios:**
   - Creación, listado y eliminación de usuarios con credenciales únicas.
@@ -30,7 +30,7 @@ Actualmente, el sistema implementa un menú principal protegido por credenciales
 
 ## Declaración de uso de IA generativa
 
-Se empleó IA generativa, Google Gemini Pro y ChatGPT-5.6 Luna, para asesoría en torno a correctitud algorítmica y sintáctica del código fuente y de la corrección conceptual, de formato y estructura del presente documento y del Manual de Usuario. Los autores asumen la responsabilidad por el contenido y la precisión del trabajo presentado.
+Se empleó IA generativa, Google Gemini Flash 3.8, Pro 3.1, Argon 4 y ChatGPT-5.6 Luna, para asesoría en torno a correctitud algorítmica y sintáctica del código fuente y de la corrección conceptual, de formato y estructura del presente documento y del Manual de Usuario. Los autores asumen la responsabilidad por el contenido y la precisión del trabajo presentado.
 
 ---
 
@@ -48,17 +48,23 @@ El sistema requiere de un archivo `.env` en la raíz del proyecto (o donde se ej
 Asegúrese de que su archivo `.env` contienga información como:
 
 ```env
-USER_FILE=./USUARIOS.TXT
-PERFIL_FILE=./PERFILES.TXT
+USER_FILE=./BD/UM/USUARIOS.TXT
+PERFIL_FILE=./BD/UM/PERFILES.TXT
+MATRIZ_A=./BD/Matrices/M1.TXT
+MATRIZ_B=./BD/Matrices/N1.TXT
+SEPARADOR_MATRICES=#
 ```
 
 Se presenta tabla que describe a detalle las variables de entorno.
 
 
-| Key           | Value            | Descripción             | Formato del contenido                   |
-| ------------- | ---------------- | ------------------------ | --------------------------------------- |
-| `USER_FILE`   | `./USUARIOS.TXT` | Ruta archivo de usuarios | `id; nombre; usuario; password; perfil` |
-| `PERFIL_FILE` | `./PERFILES.TXT` | Ruta archivo de perfiles | `nombre;permisos`                       |
+| Key                  | Value                  | Descripción                  | Formato del contenido                   |
+| -------------------- | ---------------------- | ----------------------------- | --------------------------------------- |
+| `USER_FILE`          | `./BD/UM/USUARIOS.TXT` | Ruta archivo de usuarios      | `id; nombre; usuario; password; perfil` |
+| `PERFIL_FILE`        | `./BD/UM/PERFILES.TXT` | Ruta archivo de perfiles      | `nombre;permisos`                       |
+| `MATRIZ_A`           | `./BD/Matrices/M1.TXT` | Ruta de la primera matriz     | Archivo de matriz con delimitador       |
+| `MATRIZ_B`           | `./BD/Matrices/N1.TXT` | Ruta de la segunda matriz     | Archivo de matriz con delimitador       |
+| `SEPARADOR_MATRICES` | `#`                    | Delimitador usado en matrices | Carácter delimitador (ej.`#`)          |
 
 ### 3. Compilación
 
@@ -72,7 +78,7 @@ make
 
 ### 4. Ejecución
 
-Una vez compilado y con el archivo `.env` en el mismo directorio (o en la ruta esperada), el programa exige que te identifiques mediante argumentos de consola. 
+Una vez compilado y con el archivo `.env` en el mismo directorio (o en la ruta esperada), el programa exige que te identifiques mediante argumentos de consola.
 
 Ejecute el siguiente comando reemplazando con sus credenciales:
 
@@ -81,6 +87,7 @@ Ejecute el siguiente comando reemplazando con sus credenciales:
 ```
 
 Ejemplo:
+
 ```bash
 ./mangOS -u admin -p admin123 -f Makefile
 ```
@@ -105,7 +112,8 @@ mangOS
     │   ├───UM                # Datos del módulo User Manager
     │   │       PERFILES.TXT  # Archivo plano que almacena los perfiles y permisos
     │   │       USUARIOS.TXT  # Archivo plano que almacena las credenciales
-    │   └───Matrices          # Matrices almacenadas en formato texto (.TXT)
+    │   ├───Matrices          # Matrices almacenadas en formato texto (.TXT)
+    │   └───Libros            # ~50 MB de libros de libre acceso de gutenberg.org y memoriachilena.gob.cl, en formato TXT
     │
     └───SRC                   # Código fuente de la aplicación
         ├───SistOpe           # Núcleo principal del Sistema Operativo

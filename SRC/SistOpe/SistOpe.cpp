@@ -3,10 +3,10 @@
 #include "../mainMenu/mainMenu.hpp"
 #include "../mates/mates.hpp"
 #include "../texto/texto.hpp"
-#include <windows.h>
+//#include <windows.h>
 
 int main(int argc, char* argv[]) {
-    SetConsoleOutputCP(CP_UTF8);
+    // SetConsoleOutputCP(CP_UTF8);
     //Validar ejecución del sistema y recibir datos de usuario
     if (!validaInicio(argc, argv)) return 1;
     
@@ -28,6 +28,13 @@ int main(int argc, char* argv[]) {
     valorEnvUsuario = getEnvVar(rutaEnv, "USER_FILE");
     // Validar si se encontraron las variables de entorno
     if (!valorEnvPerfil || !valorEnvUsuario) return 1;
+
+    valorEnvMatrizA = getEnvVar(rutaEnv, "MATRIZ_A");
+    if (!valorEnvMatrizA) valorEnvMatrizA = getEnvVar(rutaEnv, "RUTA_MATRIZ_A");
+    valorEnvMatrizB = getEnvVar(rutaEnv, "MATRIZ_B");
+    if (!valorEnvMatrizB) valorEnvMatrizB = getEnvVar(rutaEnv, "RUTA_MATRIZ_B");
+    valorEnvSeparador = getEnvVar(rutaEnv, "SEPARADOR_MATRICES");
+    if (!valorEnvSeparador) valorEnvSeparador = getEnvVar(rutaEnv, "SEPARADOR");
 
     // Crear listas de perfiles y usuarios
     ProfileList ListaPerfiles;

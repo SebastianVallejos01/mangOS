@@ -176,49 +176,97 @@ void menuPerfiles(const std::string& rutaFile, ProfileList& ListaPerfiles){
 
 //Usuarios
 bool leeUsuariosTxt(const std::string& rutaFile, UserList& ListaUsuarios, ProfileList& ListaPerfiles) {
-    // Abrir archivo de usuarios. Si no se puede abrir, retornar false.
-    std::ifstream archivo(rutaFile);
-    if (!archivo.is_open()) return false;
-
     ListaUsuarios.users.clear();
 
-    // Leer línea por línea, limpiar espacios y separar por ';'.
-    std::string linea;
-    while (std::getline(archivo, linea)) {
-        linea = limpiarString(linea);
-        if (linea.empty()) continue;
+    // Source - https://stackoverflow.com/q/74452768
+    // Posted by BigAgg
+    // Retrieved 2026-10-22, License - CC BY-SA 4.0
 
-        std::stringstream ss(linea);
-        std::string token;
-        User usuario;
+    using namespace std;
+    struct {
+        int id;
+        const char* nombre;
+        const char* username;
+        const char* password;
+        const char* perfil;
+        char buffer[2048];
+    } loadStruct;
 
-        if (std::getline(ss, token, ';')) usuario.id = std::stoi(token);
-        if (std::getline(ss, token, ';')) usuario.nombre = token;
-        if (std::getline(ss, token, ';')) usuario.username = token;
-        if (std::getline(ss, token, ';')) usuario.password = token;
-        if (std::getline(ss, token, ';')) usuario.perfil = token;
+    ifstream fileObj;
+    fileObj.open(rutaFile);
+    if (fileObj.is_open()){
+        string remanente = "";
+        while (!fileObj.eof()){
+            fileObj.read((char*)&loadStruct, sizeof(loadStruct));
+            streamsize bytesLeidos = fileObj.gcount();
+            if (bytesLeidos <= 0) break;
 
-        // Validación de existencia del perfil del usuario en la lista de perfiles.
-        bool perfilValido = false;
-        for (const auto& perfil : ListaPerfiles.profiles) {
-            if (perfil.name == usuario.perfil) {
-                perfilValido = true;
-                break;
+            // creating my object out of loadStruct -> working fine
+            string bloque = remanente + string((char*)&loadStruct, bytesLeidos);
+            stringstream ss(bloque);
+            string linea;
+            remanente = "";
+            while (getline(ss, linea)) {
+                if (ss.eof() && !fileObj.eof() && bloque.back() != '\n') {
+                    remanente = linea;
+                    break;
+                }
+                linea = limpiarString(linea);
+                if (linea.empty()) continue;
+
+                stringstream ssLinea(linea);
+                string token;
+                string idStr, nombreStr, usernameStr, passwordStr, perfilStr;
+
+                if (getline(ssLinea, token, ';')) idStr = token;
+                if (getline(ssLinea, token, ';')) nombreStr = token;
+                if (getline(ssLinea, token, ';')) usernameStr = token;
+                if (getline(ssLinea, token, ';')) passwordStr = token;
+                if (getline(ssLinea, token, ';')) perfilStr = token;
+
+                if (idStr.empty()) continue;
+
+                loadStruct.id = stoi(idStr);
+                loadStruct.nombre = nombreStr.c_str();
+                loadStruct.username = usernameStr.c_str();
+                loadStruct.password = passwordStr.c_str();
+                loadStruct.perfil = perfilStr.c_str();
+
+                User usuario;
+                usuario.id = loadStruct.id;
+                usuario.nombre = loadStruct.nombre;
+                usuario.username = loadStruct.username;
+                usuario.password = loadStruct.password;
+                usuario.perfil = loadStruct.perfil;
+
+                // Validación de existencia del perfil del usuario en la lista de perfiles.
+                bool perfilValido = false;
+                for (const auto& perfil : ListaPerfiles.profiles) {
+                    if (perfil.name == usuario.perfil) {
+                        perfilValido = true;
+                        break;
+                    }
+                }
+
+                // Si el perfil no es válido, asignar "GENERAL" y mostrar advertencia.
+                if (!perfilValido) {
+                    cerr << "Advertencia: Usuario '" << usuario.username << "' tiene un perfil inválido. Asignando 'GENERAL' por defecto.\n";
+                    usuario.perfil = "GENERAL";
+                }
+                // Agregar usuario a la lista
+                ListaUsuarios.users.push_back(usuario);
             }
         }
-
-        // Si el perfil no es válido, asignar "GENERAL" y mostrar advertencia.
-        if (!perfilValido) {
-            std::cerr << "Advertencia: Usuario '" << usuario.username << "' tiene un perfil inválido. Asignando 'GENERAL' por defecto.\n";
-            usuario.perfil = "GENERAL";
-        }
-        // Agregar usuario a la lista
-        ListaUsuarios.users.push_back(usuario);
+        fileObj.close();
+    } else {
+        return false;
     }
+
     // Marcar que el archivo de usuarios fue cargado correctamente.
     ListaUsuarios.txtCargado = true;
     return true;
 }
+
 
 //Listar usuarios
 bool mostrarListaUsuarios(const std::string& rutaFile, UserList& ListaUsuarios, ProfileList& ListaPerfiles) {
@@ -356,53 +404,91 @@ bool borraUsuario(int idBorrar, const std::string& rutaFile, UserList& ListaUsua
 
 //Perfiles
 bool leePerfilesTxt(const std::string& rutaFile, ProfileList& ListaPerfiles) {
-    std::ifstream archivo(rutaFile);
-    
     ListaPerfiles.profiles.clear();
 
-    // Leer línea por línea
-    if (archivo.is_open()) {
-        std::string linea;
-        while (std::getline(archivo, linea)) {
-            linea = limpiarString(linea);
-            if (linea.empty()) continue;
+    // Source - https://stackoverflow.com/q/74452768
+    // Posted by BigAgg
+    // Retrieved 2026-10-22, License - CC BY-SA 4.0
 
-            std::stringstream ss(linea);
-            std::string token;
-            Profile perfil;
+    using namespace std;
+    struct {
+        const char* name;
+        int permisos[16];
+        int cantPermisos;
+        char buffer[2048];
+    } loadStruct;
 
-            //Limpiar espacios basura y forzar mayúsculas
-            if (std::getline(ss, token, ';')) {
-                perfil.name = limpiarString(token);
-                for (char& c : perfil.name) {
-                    c = std::toupper(c);
+    ifstream fileObj;
+    fileObj.open(rutaFile);
+    if (fileObj.is_open()){
+        string remanente = "";
+        while (!fileObj.eof()){
+            fileObj.read((char*)&loadStruct, sizeof(loadStruct));
+            streamsize bytesLeidos = fileObj.gcount();
+            if (bytesLeidos <= 0) break;
+
+            // creating my object out of loadStruct -> working fine
+            string bloque = remanente + string((char*)&loadStruct, bytesLeidos);
+            stringstream ss(bloque);
+            string linea;
+            remanente = "";
+            while (getline(ss, linea)) {
+                if (ss.eof() && !fileObj.eof() && bloque.back() != '\n') {
+                    remanente = linea;
+                    break;
                 }
-            }
-            // Leer y validar permisos y convertirlos a enteros
-            std::string permisosStr;
-            if (std::getline(ss, permisosStr)) {
-                std::stringstream ssPermisos(permisosStr);
-                std::string permToken;
-                while (std::getline(ssPermisos, permToken, ',')) {
-                    if (!permToken.empty()) {
-                        try {
-                            int permiso = std::stoi(permToken);
-                            if (permiso >= 0 && permiso <= 7) {
-                                perfil.permisosMenu.push_back(permiso);
-                            } else {
-                                std::cerr << "Advertencia: Permiso '" << permiso << "' ignorado por estar fuera del rango permitido (0-7).\n";
+                linea = limpiarString(linea);
+                if (linea.empty()) continue;
+
+                stringstream ssLinea(linea);
+                string token;
+                string nombrePerfil;
+
+                // Limpiar espacios basura y forzar mayúsculas
+                if (getline(ssLinea, token, ';')) {
+                    nombrePerfil = limpiarString(token);
+                    for (char& c : nombrePerfil) {
+                        c = toupper(c);
+                    }
+                }
+                loadStruct.name = nombrePerfil.c_str();
+                loadStruct.cantPermisos = 0;
+
+                // Leer y validar permisos y convertirlos a enteros
+                string permisosStr;
+                if (getline(ssLinea, permisosStr)) {
+                    stringstream ssPermisos(permisosStr);
+                    string permToken;
+                    while (getline(ssPermisos, permToken, ',')) {
+                        if (!permToken.empty()) {
+                            try {
+                                int permiso = stoi(permToken);
+                                if (permiso >= 0 && permiso <= 8) {
+                                    if (loadStruct.cantPermisos < 16) {
+                                        loadStruct.permisos[loadStruct.cantPermisos++] = permiso;
+                                    }
+                                } else {
+                                    cerr << "Advertencia: Permiso '" << permiso << "' ignorado por estar fuera del rango permitido (0-8).\n";
+                                }
+                            } catch (const exception&) {
+                                cerr << "Advertencia: Dato corrupto '" << permToken << "' en permisos ignorado.\n";
                             }
-                        } catch (const std::exception& e) {
-                            std::cerr << "Advertencia: Dato corrupto '" << permToken << "' en permisos ignorado.\n";
                         }
                     }
                 }
+
+                Profile perfil;
+                perfil.name = loadStruct.name;
+                for (int i = 0; i < loadStruct.cantPermisos; ++i) {
+                    perfil.permisosMenu.push_back(loadStruct.permisos[i]);
+                }
+                // Agregar perfil a la lista
+                ListaPerfiles.profiles.push_back(perfil);
             }
-        // Agregar perfil a la lista y cerrar el archivo
-            ListaPerfiles.profiles.push_back(perfil);
         }
-        archivo.close();
+        fileObj.close();
     }
+
     // Crear automáticamente los perfiles base si no existen y forzar sus permisos originales
     autoCrearPerfilesBase(rutaFile, ListaPerfiles);
     // Marcar que el archivo de perfiles fue cargado correctamente
@@ -422,15 +508,15 @@ void autoCrearPerfilesBase(const std::string& rutaFile, ProfileList& ListaPerfil
         if (p.name == "ADMIN") {
             adminExiste = true;
             // Si alguien alteró el TXT, lo corregimos
-            if (p.permisosMenu != std::vector<int>{0, 1, 2, 3, 4, 5, 6, 7}) {
-                p.permisosMenu = {0, 1, 2, 3, 4, 5, 6, 7};
+            if (p.permisosMenu != std::vector<int>{0, 1, 2, 3, 4, 5, 6, 7, 8}) {
+                p.permisosMenu = {0, 1, 2, 3, 4, 5, 6, 7, 8};
                 requiereGuardar = true;
             }
         }
         if (p.name == "GENERAL") {
             generalExiste = true;
-            if (p.permisosMenu != std::vector<int>{0, 2, 3, 4, 5, 6, 7}) {
-                p.permisosMenu = {0, 2, 3, 4, 5, 6, 7};
+            if (p.permisosMenu != std::vector<int>{0, 2, 3, 4, 5, 6, 7, 8}) {
+                p.permisosMenu = {0, 2, 3, 4, 5, 6, 7, 8};
                 requiereGuardar = true;
             }
         }
@@ -440,7 +526,7 @@ void autoCrearPerfilesBase(const std::string& rutaFile, ProfileList& ListaPerfil
     if (!adminExiste) {
         Profile pAdmin;
         pAdmin.name = "ADMIN";
-        pAdmin.permisosMenu = {0, 1, 2, 3, 4, 5, 6, 7}; 
+        pAdmin.permisosMenu = {0, 1, 2, 3, 4, 5, 6, 7, 8}; 
         ListaPerfiles.profiles.push_back(pAdmin);
         requiereGuardar = true;
         std::cout << "Aviso del Sistema: Perfil 'ADMIN' restaurado por defecto.\n";
@@ -450,7 +536,7 @@ void autoCrearPerfilesBase(const std::string& rutaFile, ProfileList& ListaPerfil
     if (!generalExiste) {
         Profile pGeneral;
         pGeneral.name = "GENERAL";
-        pGeneral.permisosMenu = {0, 2, 3, 4, 5, 6, 7}; 
+        pGeneral.permisosMenu = {0, 2, 3, 4, 5, 6, 7, 8}; 
         ListaPerfiles.profiles.push_back(pGeneral);
         requiereGuardar = true;
         std::cout << "Aviso del Sistema: Perfil 'GENERAL' restaurado por defecto.\n";
@@ -535,7 +621,7 @@ bool creaPerfil(const std::string& rutaFile, ProfileList& ListaPerfiles){
 
         //Permisos
         std::cout << "\nIngrese los permisos que desea darle al perfil:\n";
-        std::cout << "Se aceptan permisos del 1 al 7 para opciones futuras || (Ingrese '0' para terminar)\n";
+        std::cout << "Se aceptan permisos del 1 al 8 para opciones futuras || (Ingrese '0' para terminar)\n";
         int permiso;
         do 
         {
@@ -552,7 +638,7 @@ bool creaPerfil(const std::string& rutaFile, ProfileList& ListaPerfiles){
             }
     
             // Validación de permisos
-            if (permiso >= 1 && permiso <= 7) 
+            if (permiso >= 1 && permiso <= 8) 
             {
                 bool existe = false;
                 for (int valor : newProfile.permisosMenu){

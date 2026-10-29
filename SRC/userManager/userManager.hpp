@@ -65,6 +65,21 @@ inline std::optional<std::string> valorEnvUsuario;
  */
 inline std::optional<std::string> valorEnvPerfil;
 
+/**
+ * @brief Variable global que almacena el valor de la variable de entorno "MATRIZ_A" si es encontrada en el archivo .env.
+ */
+inline std::optional<std::string> valorEnvMatrizA;
+
+/**
+ * @brief Variable global que almacena el valor de la variable de entorno "MATRIZ_B" si es encontrada en el archivo .env.
+ */
+inline std::optional<std::string> valorEnvMatrizB;
+
+/**
+ * @brief Variable global que almacena el valor de la variable de entorno "SEPARADOR_MATRICES" si es encontrada en el archivo .env.
+ */
+inline std::optional<std::string> valorEnvSeparador;
+
 
 /**
  * @brief Busca un archivo de entorno (.env) en la ruta actual y subiendo directorios hasta la raíz.
