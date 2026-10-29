@@ -3,6 +3,7 @@
 #include "../mates/mates.hpp"
 #include "../texto/texto.hpp"
 #include "../index/index.hpp"
+#include "../juego/menuJuego.hpp"
 
 #include <limits>
 
