@@ -3,4 +3,10 @@ mangOS
 mangOS.exe
 multi
 multi.exe
+servidor_juego
+servidor_juego.exe
+cliente_juego
+cliente_juego.exe
+SRC/juego/Classes/GameState
+SRC/juego/Classes/GameState.exe
 .env
